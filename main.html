@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game by Taher - Moba Mini - Gameplay</title>
+    <title>Game Moba Mini - Gameplay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
+        /* CSS tetap sama, tidak ada perubahan */
         * {
             margin: 0;
             padding: 0;
@@ -18,247 +19,135 @@
             background: #000;
             color: white;
             overflow: hidden;
-            height: 100vh;
-            width: 100vw;
+            touch-action: none;
         }
         
         #game-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             overflow: hidden;
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
         }
         
-        /* Scene Pemilihan Hero */
-        #hero-selection {
+        #game-canvas {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
+            background: #1a5c1a;
         }
         
-        .selection-title {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            color: gold;
-            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
-        }
-        
-        .hero-selection-grid {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-        
-        .hero-selection-card {
-            width: 200px;
-            height: 280px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-        }
-        
-        .hero-selection-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        
-        .hero-selection-card.selected {
-            border-color: gold;
-            box-shadow: 0 0 20px gold;
-        }
-        
-        .hero-selection-image {
-            height: 150px;
-            background: linear-gradient(45deg, #1a2a6c, #b21f1f);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            overflow: hidden;
-        }
-        
-        .hero-selection-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        
-        .hero-selection-details {
-            padding: 15px;
-            text-align: center;
-        }
-        
-        .hero-selection-name {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            color: gold;
-        }
-        
-        .hero-selection-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-        }
-        
-        .start-game-btn {
-            background: linear-gradient(to right, #ff8a00, #ff2070);
-            color: white;
-            padding: 15px 40px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .start-game-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 138, 0, 0.4);
-        }
-        
-        .start-game-btn:disabled {
-            background: #666;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        
-        /* Game UI */
+        /* UI Gameplay */
         #game-ui {
             position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            z-index: 10;
             pointer-events: none;
+            z-index: 10;
         }
         
-        .minimap {
+        /* Minimap */
+        #minimap {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 200px;
-            height: 200px;
+            top: 10px;
+            right: 10px;
+            width: 150px;
+            height: 150px;
             background: rgba(0, 0, 0, 0.7);
             border: 2px solid gold;
-            border-radius: 10px;
-            overflow: hidden;
+            border-radius: 5px;
+            z-index: 11;
         }
         
-        .game-stats {
+        /* HP Bar */
+        .hp-bar {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            border: 2px solid gold;
-        }
-        
-        .player-info {
-            display: flex;
-            align-items: center;
-            margin-bottom: 10px;
-        }
-        
-        .player-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, #ff8a00, #ff2070);
-            margin-right: 10px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            border: 2px solid gold;
-        }
-        
-        .player-hp-bar {
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
             width: 200px;
             height: 20px;
-            background: rgba(255, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid #333;
             border-radius: 10px;
             overflow: hidden;
-            margin-bottom: 5px;
+            z-index: 11;
         }
         
-        .player-hp-fill {
+        .hp-fill {
             height: 100%;
-            background: linear-gradient(to right, #ff0000, #00ff00);
+            background: linear-gradient(to right, #ff0000, #ff9900);
+            border-radius: 8px;
             transition: width 0.3s;
         }
         
-        .player-level {
-            margin-left: 10px;
-            font-weight: bold;
-            color: gold;
-        }
-        
-        .game-info {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 10px;
-        }
-        
-        .gold-info, .level-info {
-            display: flex;
-            align-items: center;
-        }
-        
-        .gold-icon, .level-icon {
-            margin-right: 5px;
-            font-size: 1.2rem;
-        }
-        
-        /* Skill Bar */
-        .skill-bar {
+        /* Joystick */
+        #joystick-container {
             position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 15px;
-            border: 2px solid gold;
+            bottom: 120px;
+            left: 50px;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            pointer-events: auto;
+            z-index: 12;
         }
         
-        .skill {
+        #joystick {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
             width: 60px;
             height: 60px;
-            border-radius: 10px;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* Skill Buttons */
+        #skill-container {
+            position: absolute;
+            bottom: 100px;
+            right: 20px;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            align-items: flex-end;
+            gap: 10px;
             pointer-events: auto;
-            position: relative;
-            overflow: hidden;
+            z-index: 12;
         }
         
-        .skill-icon {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+        .skill-row {
+            display: flex;
+            gap: 10px;
         }
         
-        .skill-key {
+        .skill-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
             font-size: 0.8rem;
-            color: #ccc;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .skill-btn:active {
+            transform: scale(0.95);
+            background: rgba(50, 50, 50, 0.7);
         }
         
         .skill-cooldown {
@@ -268,175 +157,152 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.7);
-            display: flex;
-            align-items: center;
+            border-radius: 50%;
+            display: none;
             justify-content: center;
+            align-items: center;
             font-size: 1.2rem;
             font-weight: bold;
-            color: white;
-            opacity: 0;
-            transition: opacity 0.3s;
         }
         
-        .skill-cooldown.active {
-            opacity: 1;
+        #basic-attack {
+            background: rgba(200, 0, 0, 0.7);
         }
         
-        /* Joystick */
-        #joystick-container {
+        /* Target Indicator */
+        .target-indicator {
             position: absolute;
-            bottom: 120px;
-            left: 30px;
-            width: 120px;
-            height: 120px;
-            pointer-events: auto;
-        }
-        
-        .joystick-base {
-            width: 100%;
-            height: 100%;
+            width: 10px;
+            height: 10px;
+            background: red;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.2);
-            border: 2px solid rgba(255, 255, 255, 0.5);
-        }
-        
-        .joystick-handle {
-            position: absolute;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.8);
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.1s;
-        }
-        
-        /* Shop */
-        .shop-button {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            pointer-events: auto;
-            border: 2px solid gold;
-            font-size: 1.5rem;
-        }
-        
-        .shop-menu {
-            position: absolute;
-            bottom: 90px;
-            right: 20px;
-            width: 300px;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 15px;
-            padding: 15px;
-            border: 2px solid gold;
+            pointer-events: none;
+            z-index: 9;
             display: none;
         }
         
-        .shop-menu.active {
-            display: block;
-        }
-        
-        .shop-title {
-            text-align: center;
-            margin-bottom: 15px;
-            color: gold;
-            font-size: 1.2rem;
-        }
-        
-        .shop-items {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        
-        .shop-item {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 8px;
-            padding: 10px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .shop-item:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .item-name {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        
-        .item-price {
-            display: flex;
-            align-items: center;
-            font-size: 0.9rem;
-            color: gold;
-        }
-        
-        /* Game Canvas */
-        #game-canvas {
+        /* Shop Button */
+        #shop-btn {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 2px solid gold;
+            border-radius: 10px;
+            color: gold;
+            font-weight: bold;
+            cursor: pointer;
+            pointer-events: auto;
+            z-index: 12;
         }
         
-        /* Game Over Screen */
-        #game-over {
+        /* Shop Modal */
+        #shop-modal {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.8);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
             display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
         }
         
-        .game-over-title {
-            font-size: 3rem;
+        .shop-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid gold;
+            border-radius: 15px;
+            padding: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .shop-title {
+            text-align: center;
+            font-size: 1.5rem;
             margin-bottom: 20px;
             color: gold;
         }
         
-        .game-result {
-            font-size: 2rem;
-            margin-bottom: 30px;
-        }
-        
-        .victory {
-            color: #00ff00;
-        }
-        
-        .defeat {
-            color: #ff0000;
-        }
-        
-        .game-stats-summary {
+        .shop-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
             background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-            width: 300px;
+            border-radius: 10px;
+            margin-bottom: 10px;
         }
         
-        .stat-row {
+        .shop-item-info {
+            flex: 1;
+        }
+        
+        .shop-item-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .shop-item-desc {
+            font-size: 0.8rem;
+            color: #ccc;
+        }
+        
+        .shop-item-price {
+            display: flex;
+            align-items: center;
+            margin-right: 10px;
+        }
+        
+        .buy-btn {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Game Over Modal */
+        #game-over-modal {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+        
+        .game-over-content {
+            background: rgba(0, 0, 0, 0.9);
+            border: 2px solid gold;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        
+        .game-over-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: gold;
+        }
+        
+        .game-over-stats {
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
@@ -445,146 +311,141 @@
         .back-to-menu {
             background: linear-gradient(to right, #ff8a00, #ff2070);
             color: white;
-            padding: 15px 30px;
+            padding: 12px 25px;
             border: none;
-            border-radius: 10px;
-            font-size: 1.2rem;
+            border-radius: 8px;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s;
+            margin-top: 20px;
         }
         
-        .back-to-menu:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(255, 138, 0, 0.4);
+        /* Loading Screen */
+        #loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+        
+        .loading-content {
+            text-align: center;
+        }
+        
+        .loading-title {
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: gold;
+        }
+        
+        .loading-bar {
+            width: 300px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        
+        .loading-progress {
+            height: 100%;
+            background: linear-gradient(to right, #ff8a00, #ff2070);
+            width: 0%;
+            transition: width 0.3s;
         }
     </style>
 </head>
 <body>
     <div id="game-container">
-        <!-- Scene Pemilihan Hero -->
-        <div id="hero-selection">
-            <h2 class="selection-title">Pilih Hero Anda</h2>
-            <div class="hero-selection-grid" id="hero-selection-grid">
-                <!-- Hero akan dimuat dari JavaScript -->
-            </div>
-            <button id="start-game-btn" class="start-game-btn" disabled>Mulai Game</button>
-        </div>
-
-        <!-- Game Canvas -->
         <canvas id="game-canvas"></canvas>
-
-        <!-- Game UI -->
+        
         <div id="game-ui">
-            <div class="minimap"></div>
-            
-            <div class="game-stats">
-                <div class="player-info">
-                    <div class="player-avatar" id="player-avatar">T</div>
-                    <div>
-                        <div class="player-name" id="player-name">Taher</div>
-                        <div class="player-hp-bar">
-                            <div class="player-hp-fill" id="player-hp-fill" style="width: 100%;"></div>
-                        </div>
-                    </div>
-                    <div class="player-level" id="player-level">Lv.1</div>
-                </div>
-                
-                <div class="game-info">
-                    <div class="gold-info">
-                        <span class="gold-icon">💰</span>
-                        <span id="player-gold">0</span>
-                    </div>
-                    <div class="level-info">
-                        <span class="level-icon">⭐</span>
-                        <span id="player-experience">0/1000</span>
-                    </div>
-                </div>
+            <div class="hp-bar">
+                <div class="hp-fill" id="player-hp-bar"></div>
             </div>
             
-            <div class="skill-bar">
-                <div class="skill" id="skill-1">
-                    <div class="skill-icon">🔥</div>
-                    <div class="skill-key">1</div>
-                    <div class="skill-cooldown" id="skill-1-cooldown"></div>
-                </div>
-                <div class="skill" id="skill-2">
-                    <div class="skill-icon">⚡</div>
-                    <div class="skill-key">2</div>
-                    <div class="skill-cooldown" id="skill-2-cooldown"></div>
-                </div>
-                <div class="skill" id="skill-3">
-                    <div class="skill-icon">💥</div>
-                    <div class="skill-key">3</div>
-                    <div class="skill-cooldown" id="skill-3-cooldown"></div>
-                </div>
-                <div class="skill" id="regen-skill">
-                    <div class="skill-icon">❤️</div>
-                    <div class="skill-key">R</div>
-                    <div class="skill-cooldown" id="regen-cooldown"></div>
-                </div>
-            </div>
+            <canvas id="minimap" width="150" height="150"></canvas>
             
             <div id="joystick-container">
-                <div class="joystick-base"></div>
-                <div class="joystick-handle"></div>
+                <div id="joystick"></div>
             </div>
             
-            <div class="shop-button" id="shop-button">🛒</div>
-            <div class="shop-menu" id="shop-menu">
-                <h3 class="shop-title">SHOP</h3>
-                <div class="shop-items">
-                    <div class="shop-item" data-item="shoes">
-                        <div class="item-name">Sepatu</div>
-                        <div class="item-description">Pengurangan Cooldown</div>
-                        <div class="item-price">💰 400</div>
+            <div id="skill-container">
+                <div class="skill-row">
+                    <div class="skill-btn" id="skill-1">
+                        <span>Skill 1</span>
+                        <div class="skill-cooldown" id="cooldown-1"></div>
                     </div>
-                    <div class="shop-item" data-item="psif">
-                        <div class="item-name">Psif</div>
-                        <div class="item-description">Mengurangi Cooldown 30%</div>
-                        <div class="item-price">💰 850</div>
+                    <div class="skill-btn" id="skill-2">
+                        <span>Skill 2</span>
+                        <div class="skill-cooldown" id="cooldown-2"></div>
                     </div>
-                    <div class="shop-item" data-item="pistol">
-                        <div class="item-name">Pistol</div>
-                        <div class="item-description">+70 Damage, Merapuhkan HP Lawan</div>
-                        <div class="item-price">💰 850</div>
+                </div>
+                <div class="skill-row">
+                    <div class="skill-btn" id="skill-3">
+                        <span>Ultimate</span>
+                        <div class="skill-cooldown" id="cooldown-3"></div>
                     </div>
-                    <div class="shop-item" data-item="blade">
-                        <div class="item-name">Blade Es</div>
-                        <div class="item-description">Setiap 3 basic attack mengurangi speed lawan 10%</div>
-                        <div class="item-price">💰 900</div>
+                    <div class="skill-btn" id="basic-attack">
+                        <span>Attack</span>
                     </div>
+                </div>
+            </div>
+            
+            <button id="shop-btn">SHOP</button>
+        </div>
+        
+        <div id="shop-modal">
+            <div class="shop-content">
+                <h2 class="shop-title">SHOP</h2>
+                <div id="shop-items">
+                    <!-- Items will be populated by JavaScript -->
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button id="close-shop">Tutup</button>
                 </div>
             </div>
         </div>
         
-        <!-- Game Over Screen -->
-        <div id="game-over">
-            <h2 class="game-over-title">GAME OVER</h2>
-            <div class="game-result" id="game-result">KALAH</div>
-            <div class="game-stats-summary">
-                <div class="stat-row">
-                    <span>Kills:</span>
-                    <span id="stat-kills">0</span>
+        <div id="game-over-modal">
+            <div class="game-over-content">
+                <h2 class="game-over-title" id="game-result">VICTORY!</h2>
+                <div class="game-over-stats">
+                    <div class="stat-item">
+                        <span>Kills:</span>
+                        <span id="stat-kills">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Deaths:</span>
+                        <span id="stat-deaths">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Assists:</span>
+                        <span id="stat-assists">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span>Gold Earned:</span>
+                        <span id="stat-gold">0</span>
+                    </div>
                 </div>
-                <div class="stat-row">
-                    <span>Deaths:</span>
-                    <span id="stat-deaths">0</span>
-                </div>
-                <div class="stat-row">
-                    <span>Assists:</span>
-                    <span id="stat-assists">0</span>
-                </div>
-                <div class="stat-row">
-                    <span>Gold:</span>
-                    <span id="stat-gold">0</span>
-                </div>
-                <div class="stat-row">
-                    <span>Level:</span>
-                    <span id="stat-level">1</span>
-                </div>
+                <button class="back-to-menu" id="back-to-menu">Kembali ke Menu</button>
             </div>
-            <button class="back-to-menu" id="back-to-menu">Kembali ke Menu</button>
+        </div>
+        
+        <div id="loading-screen">
+            <div class="loading-content">
+                <h2 class="loading-title">MOBA MINI</h2>
+                <div class="loading-bar">
+                    <div class="loading-progress" id="loading-progress"></div>
+                </div>
+                <p id="loading-text">Memuat game...</p>
+            </div>
         </div>
     </div>
 
@@ -606,1013 +467,132 @@
         const database = firebase.database();
 
         // Variabel global
+        let canvas, ctx;
         let currentUser = null;
         let userData = null;
         let selectedHero = null;
-        let gameActive = false;
-        let canvas, ctx;
-        let player = null;
-        let joystickActive = false;
-        let joystickDirection = { x: 0, y: 0 };
-        let joystickOrigin = { x: 0, y: 0 };
-        let gameObjects = [];
-        let minions = [];
-        let turrets = [];
-        let buffs = [];
-        let players = [];
-        let aiPlayers = [];
-        let projectiles = [];
-        let playerTeam = 'blue';
-        let enemyTeam = 'red';
-        let gameTime = 0;
-        let lastGoldTime = 0;
-        let lastMinionSpawn = 0;
-        let playerStats = {
+        let gameMode = null;
+        
+        // Data game
+        let gameState = {
+            players: [],
+            minions: [],
+            turrets: [],
+            buffs: [],
+            projectiles: [],
+            gameTime: 0,
+            goldTimer: 0,
+            minionTimer: 0,
+            attackTimers: {}
+        };
+        
+        // Data player
+        let player = {
+            x: 0,
+            y: 0,
+            radius: 25,
+            speed: 3,
+            hp: 0,
+            maxHp: 0,
+            damage: 50,
+            gold: 0,
+            level: 1,
+            items: [],
+            skills: {
+                skill1: { cooldown: 0, maxCooldown: 5 },
+                skill2: { cooldown: 0, maxCooldown: 5 },
+                skill3: { cooldown: 0, maxCooldown: 16 }
+            },
+            team: 'blue',
             kills: 0,
             deaths: 0,
             assists: 0,
-            gold: 0,
-            level: 1,
-            experience: 0
+            target: null,
+            attackCooldown: 0,
+            lastAttackTime: 0
         };
-
+        
         // Data hero
         const heroData = {
             "narto": {
                 name: "Narto",
-                hp: 6000,
                 maxHp: 6000,
-                damage: 100,
-                speed: 5,
-                skills: [
-                    { name: "Rasengan Mini", damage: 20, cooldown: 5, duration: 0, effect: "stun", effectDuration: 3, icon: "🔥", key: "1" },
-                    { name: "Kurama Boost", damage: 30, cooldown: 5, duration: 2.5, effect: "boost", effectDuration: 2.5, icon: "⚡", key: "2" },
-                    { name: "Mode Kurama", damage: 40, cooldown: 16, duration: 5, effect: "transform", effectDuration: 5, icon: "💥", key: "3" }
-                ],
-                image: "https://c.top4top.io/p_36068qft31.png"
+                skills: {
+                    skill1: { name: "Rasengan Mini", damage: 20, cooldown: 5, effect: "stun", effectDuration: 3 },
+                    skill2: { name: "Kyuubi Boost", damage: 30, cooldown: 5, effect: "buff", effectDuration: 2.5, buff: { attackSpeed: 2.0, damage: 30 } },
+                    skill3: { name: "Mode Kurama", damage: 40, cooldown: 16, effect: "transform", effectDuration: 5, buff: { damageReduction: 0.8, speed: 3.5 } }
+                }
             },
             "saskeh": {
                 name: "Saskeh",
-                hp: 5500,
                 maxHp: 5500,
-                damage: 110,
-                speed: 6,
-                skills: [
-                    { name: "Speed Boost", damage: 0, cooldown: 5, duration: 3.5, effect: "speed", effectDuration: 3.5, icon: "🌀", key: "1" },
-                    { name: "Petir Biru", damage: 170, cooldown: 7, duration: 2.5, effect: "damage", effectDuration: 2.5, icon: "⚡", key: "2" },
-                    { name: "Mode Mangekeyo", damage: 70, cooldown: 19, duration: 5, effect: "transform", effectDuration: 5, icon: "👁️", key: "3" }
-                ],
-                image: "https://b.top4top.io/p_3606vrk010.png"
+                skills: {
+                    skill1: { name: "Speed Boost", damage: 0, cooldown: 5, effect: "buff", effectDuration: 3.5, buff: { speed: 2.0 } },
+                    skill2: { name: "Chidori", damage: 170, cooldown: 7, effect: "damage" },
+                    skill3: { name: "Mangekyo", damage: 70, cooldown: 19, effect: "transform", effectDuration: 5, buff: { damage: 70, attackSpeed: 20, speed: 0.5 } }
+                }
             },
             "lord_tachi": {
                 name: "Lord Tachi",
-                hp: 5000,
                 maxHp: 5000,
-                damage: 120,
-                speed: 4,
-                skills: [
-                    { name: "Skill 1", damage: 50, cooldown: 5, duration: 0, effect: "damage", effectDuration: 0, icon: "🗡️", key: "1" },
-                    { name: "Skill 2", damage: 80, cooldown: 7, duration: 0, effect: "damage", effectDuration: 0, icon: "🛡️", key: "2" },
-                    { name: "Skill 3", damage: 120, cooldown: 10, duration: 0, effect: "damage", effectDuration: 0, icon: "👑", key: "3" }
-                ],
-                image: "https://l.top4top.io/p_3606j9ku80.png"
+                skills: {
+                    skill1: { name: "Coming Soon", damage: 0, cooldown: 5 },
+                    skill2: { name: "Coming Soon", damage: 0, cooldown: 5 },
+                    skill3: { name: "Coming Soon", damage: 0, cooldown: 16 }
+                }
             }
         };
-
-        // Data item shop
-        const shopItems = {
-            "shoes": { name: "Sepatu", price: 400, effect: "cooldownReduction", value: 0.1 },
-            "psif": { name: "Psif", price: 850, effect: "cooldownReduction", value: 0.3 },
+        
+        // Data item
+        const itemData = {
+            "sepatu": { name: "Sepatu", price: 400, effect: "cooldown", value: 0.3 },
             "pistol": { name: "Pistol", price: 850, effect: "damage", value: 70 },
-            "blade": { name: "Blade Es", price: 900, effect: "slow", value: 0.1 }
+            "blade_es": { name: "Blade Es", price: 900, effect: "slow", value: { slow: 0.1, attackSlow: 0.2, damage: 60 } }
+        };
+        
+        // Data map
+        const mapData = {
+            width: 2000,
+            height: 2000,
+            baseBlue: { x: 200, y: 1000, radius: 100 },
+            baseRed: { x: 1800, y: 1000, radius: 100 },
+            turrets: [
+                { x: 500, y: 1000, team: 'blue', hp: 2000, damage: 900, range: 150, attackCooldown: 0, lastAttackTime: 0 },
+                { x: 1500, y: 1000, team: 'red', hp: 2000, damage: 900, range: 150, attackCooldown: 0, lastAttackTime: 0 }
+            ],
+            buffs: [
+                { x: 600, y: 600, team: 'blue', hp: 4000, gold: 150 },
+                { x: 600, y: 1400, team: 'blue', hp: 4000, gold: 150 },
+                { x: 1400, y: 600, team: 'red', hp: 4000, gold: 150 },
+                { x: 1400, y: 1400, team: 'red', hp: 4000, gold: 150 }
+            ]
+        };
+        
+        // Joystick
+        let joystick = {
+            x: 0,
+            y: 0,
+            active: false,
+            baseX: 0,
+            baseY: 0,
+            touchId: null
+        };
+        
+        // Kamera
+        let camera = {
+            x: 0,
+            y: 0
         };
 
-        // Kelas Player
-        class Player {
-            constructor(id, name, hero, team, x, y, isAI = false) {
-                this.id = id;
-                this.name = name;
-                this.hero = hero;
-                this.team = team;
-                this.x = x;
-                this.y = y;
-                this.radius = 30;
-                this.hp = heroData[hero].hp;
-                this.maxHp = heroData[hero].hp;
-                this.damage = heroData[hero].damage;
-                this.speed = heroData[hero].speed;
-                this.skills = JSON.parse(JSON.stringify(heroData[hero].skills));
-                this.isAI = isAI;
-                this.target = null;
-                this.destination = null;
-                this.attackCooldown = 0;
-                this.skillCooldowns = [0, 0, 0];
-                this.regenCooldown = 0;
-                this.effects = [];
-                this.items = [];
-                this.level = 1;
-                this.experience = 0;
-                this.kills = 0;
-                this.deaths = 0;
-                this.assists = 0;
-                this.gold = 0;
-                this.lastAttackTime = 0;
-                
-                // AI behavior
-                this.aiState = 'idle';
-                this.aiTimer = 0;
-                this.aiTarget = null;
-            }
-
-            update(deltaTime) {
-                // Update cooldowns
-                this.attackCooldown = Math.max(0, this.attackCooldown - deltaTime);
-                for (let i = 0; i < this.skillCooldowns.length; i++) {
-                    this.skillCooldowns[i] = Math.max(0, this.skillCooldowns[i] - deltaTime);
-                }
-                this.regenCooldown = Math.max(0, this.regenCooldown - deltaTime);
-                
-                // Update effects
-                for (let i = this.effects.length - 1; i >= 0; i--) {
-                    this.effects[i].duration -= deltaTime;
-                    if (this.effects[i].duration <= 0) {
-                        this.removeEffect(this.effects[i].type);
-                        this.effects.splice(i, 1);
-                    }
-                }
-                
-                // AI behavior
-                if (this.isAI) {
-                    this.updateAI(deltaTime);
-                }
-                
-                // Regenerate HP if in base
-                if (this.isInBase()) {
-                    this.hp = Math.min(this.maxHp, this.hp + (this.maxHp * 0.05 * deltaTime));
-                }
-                
-                // Apply movement if has destination
-                if (this.destination) {
-                    const dx = this.destination.x - this.x;
-                    const dy = this.destination.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 5) {
-                        this.destination = null;
-                    } else {
-                        const moveX = (dx / distance) * this.speed;
-                        const moveY = (dy / distance) * this.speed;
-                        
-                        this.x += moveX;
-                        this.y += moveY;
-                    }
-                }
-                
-                // Attack target if in range
-                if (this.target && this.attackCooldown <= 0) {
-                    const dx = this.target.x - this.x;
-                    const dy = this.target.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 150) { // Attack range
-                        this.attack(this.target);
-                        this.attackCooldown = 1; // 1 second cooldown for basic attack
-                    } else {
-                        // Move towards target if out of range
-                        this.destination = { x: this.target.x, y: this.target.y };
-                    }
-                }
-            }
-            
-            updateAI(deltaTime) {
-                this.aiTimer -= deltaTime;
-                
-                if (this.aiTimer <= 0) {
-                    // Reset AI timer and decide new action
-                    this.aiTimer = Math.random() * 3 + 2; // 2-5 seconds
-                    
-                    const actions = ['attack', 'defend', 'farm', 'objective'];
-                    const weights = [0.4, 0.2, 0.3, 0.1];
-                    
-                    let randomValue = Math.random();
-                    let cumulativeWeight = 0;
-                    let selectedAction = 'attack';
-                    
-                    for (let i = 0; i < actions.length; i++) {
-                        cumulativeWeight += weights[i];
-                        if (randomValue <= cumulativeWeight) {
-                            selectedAction = actions[i];
-                            break;
-                        }
-                    }
-                    
-                    this.aiState = selectedAction;
-                    
-                    // Execute action based on state
-                    switch (this.aiState) {
-                        case 'attack':
-                            // Find nearest enemy
-                            let nearestEnemy = null;
-                            let minDistance = Infinity;
-                            
-                            for (let obj of gameObjects) {
-                                if (obj.team !== this.team && (obj instanceof Player || obj instanceof Minion)) {
-                                    const dx = obj.x - this.x;
-                                    const dy = obj.y - this.y;
-                                    const distance = Math.sqrt(dx * dx + dy * dy);
-                                    
-                                    if (distance < minDistance) {
-                                        minDistance = distance;
-                                        nearestEnemy = obj;
-                                    }
-                                }
-                            }
-                            
-                            if (nearestEnemy) {
-                                this.target = nearestEnemy;
-                                this.destination = { x: nearestEnemy.x, y: nearestEnemy.y };
-                            }
-                            break;
-                            
-                        case 'defend':
-                            // Return to base
-                            const base = this.team === 'blue' ? { x: 200, y: 400 } : { x: 1800, y: 400 };
-                            this.destination = base;
-                            this.target = null;
-                            break;
-                            
-                        case 'farm':
-                            // Find nearest minion
-                            let nearestMinion = null;
-                            let minMinionDistance = Infinity;
-                            
-                            for (let minion of minions) {
-                                if (minion.team === this.team) {
-                                    const dx = minion.x - this.x;
-                                    const dy = minion.y - this.y;
-                                    const distance = Math.sqrt(dx * dx + dy * dy);
-                                    
-                                    if (distance < minMinionDistance) {
-                                        minMinionDistance = distance;
-                                        nearestMinion = minion;
-                                    }
-                                }
-                            }
-                            
-                            if (nearestMinion) {
-                                this.destination = { x: nearestMinion.x, y: nearestMinion.y };
-                                this.target = null;
-                            }
-                            break;
-                            
-                        case 'objective':
-                            // Go for buff
-                            let nearestBuff = null;
-                            let minBuffDistance = Infinity;
-                            
-                            for (let buff of buffs) {
-                                const dx = buff.x - this.x;
-                                const dy = buff.y - this.y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                
-                                if (distance < minBuffDistance) {
-                                    minBuffDistance = distance;
-                                    nearestBuff = buff;
-                                }
-                            }
-                            
-                            if (nearestBuff) {
-                                this.destination = { x: nearestBuff.x, y: nearestBuff.y };
-                                this.target = null;
-                            }
-                            break;
-                    }
-                }
-                
-                // Use skills randomly
-                if (Math.random() < 0.01) { // 1% chance per frame to use a skill
-                    const availableSkills = [];
-                    for (let i = 0; i < this.skillCooldowns.length; i++) {
-                        if (this.skillCooldowns[i] <= 0) {
-                            availableSkills.push(i);
-                        }
-                    }
-                    
-                    if (availableSkills.length > 0) {
-                        const randomSkill = availableSkills[Math.floor(Math.random() * availableSkills.length)];
-                        this.useSkill(randomSkill);
-                    }
-                }
-            }
-            
-            attack(target) {
-                if (this.attackCooldown <= 0) {
-                    // Create projectile
-                    const projectile = new Projectile(
-                        this.x, 
-                        this.y, 
-                        target.x, 
-                        target.y, 
-                        this.damage, 
-                        this.team,
-                        this
-                    );
-                    projectiles.push(projectile);
-                    
-                    this.lastAttackTime = Date.now();
-                    return true;
-                }
-                return false;
-            }
-            
-            useSkill(skillIndex) {
-                if (skillIndex < 0 || skillIndex >= this.skills.length) return false;
-                
-                const skill = this.skills[skillIndex];
-                
-                if (this.skillCooldowns[skillIndex] > 0) return false;
-                
-                // Apply skill effect
-                switch (skill.effect) {
-                    case 'stun':
-                        // Find nearest enemy and stun them
-                        let nearestEnemy = null;
-                        let minDistance = Infinity;
-                        
-                        for (let obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Player || obj instanceof Minion)) {
-                                const dx = obj.x - this.x;
-                                const dy = obj.y - this.y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                
-                                if (distance < 300 && distance < minDistance) { // Skill range
-                                    minDistance = distance;
-                                    nearestEnemy = obj;
-                                }
-                            }
-                        }
-                        
-                        if (nearestEnemy) {
-                            nearestEnemy.addEffect('stun', skill.effectDuration);
-                            
-                            // Create visual effect
-                            const effect = new SkillEffect(
-                                nearestEnemy.x,
-                                nearestEnemy.y,
-                                skill.effectDuration,
-                                'stun'
-                            );
-                            gameObjects.push(effect);
-                        }
-                        break;
-                        
-                    case 'boost':
-                        this.addEffect('boost', skill.effectDuration);
-                        this.damage += skill.damage;
-                        break;
-                        
-                    case 'speed':
-                        this.addEffect('speed', skill.effectDuration);
-                        this.speed *= 1.2;
-                        break;
-                        
-                    case 'transform':
-                        this.addEffect('transform', skill.effectDuration);
-                        this.damage += skill.damage;
-                        this.speed *= 1.3;
-                        break;
-                        
-                    case 'damage':
-                        // Direct damage to nearest enemy
-                        let nearestTarget = null;
-                        let minTargetDistance = Infinity;
-                        
-                        for (let obj of gameObjects) {
-                            if (obj.team !== this.team && (obj instanceof Player || obj instanceof Minion)) {
-                                const dx = obj.x - this.x;
-                                const dy = obj.y - this.y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                
-                                if (distance < 400 && distance < minTargetDistance) { // Skill range
-                                    minTargetDistance = distance;
-                                    nearestTarget = obj;
-                                }
-                            }
-                        }
-                        
-                        if (nearestTarget) {
-                            nearestTarget.takeDamage(skill.damage, this);
-                            
-                            // Create visual effect
-                            const effect = new SkillEffect(
-                                nearestTarget.x,
-                                nearestTarget.y,
-                                1,
-                                'damage'
-                            );
-                            gameObjects.push(effect);
-                        }
-                        break;
-                }
-                
-                // Set cooldown
-                this.skillCooldowns[skillIndex] = skill.cooldown;
-                
-                return true;
-            }
-            
-            addEffect(type, duration) {
-                this.effects.push({ type, duration });
-            }
-            
-            removeEffect(type) {
-                // Remove effect and revert changes
-                switch (type) {
-                    case 'boost':
-                        this.damage -= heroData[this.hero].skills[1].damage;
-                        break;
-                    case 'speed':
-                        this.speed = heroData[this.hero].speed;
-                        break;
-                    case 'transform':
-                        this.damage = heroData[this.hero].damage;
-                        this.speed = heroData[this.hero].speed;
-                        break;
-                }
-            }
-            
-            takeDamage(amount, source) {
-                this.hp -= amount;
-                
-                if (this.hp <= 0) {
-                    this.die(source);
-                }
-            }
-            
-            die(killer) {
-                this.hp = 0;
-                this.deaths++;
-                
-                if (killer && killer instanceof Player) {
-                    killer.kills++;
-                    killer.gold += 300; // Gold for kill
-                    killer.experience += 500; // XP for kill
-                    
-                    // Check for level up
-                    while (killer.experience >= killer.level * 1000) {
-                        killer.experience -= killer.level * 1000;
-                        killer.level++;
-                        killer.maxHp += 500;
-                        killer.hp = killer.maxHp;
-                        killer.damage += 20;
-                    }
-                }
-                
-                // Respawn after 5 seconds
-                setTimeout(() => {
-                    this.respawn();
-                }, 5000);
-            }
-            
-            respawn() {
-                this.hp = this.maxHp;
-                
-                // Reset position to base
-                if (this.team === 'blue') {
-                    this.x = 200;
-                    this.y = 400;
-                } else {
-                    this.x = 1800;
-                    this.y = 400;
-                }
-                
-                this.target = null;
-                this.destination = null;
-                this.effects = [];
-            }
-            
-            isInBase() {
-                if (this.team === 'blue') {
-                    return this.x < 400 && this.y > 200 && this.y < 600;
-                } else {
-                    return this.x > 1600 && this.y > 200 && this.y < 600;
-                }
-            }
-            
-            draw() {
-                // Draw player circle
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                
-                // Set color based on team
-                if (this.team === 'blue') {
-                    ctx.fillStyle = 'rgba(0, 100, 255, 0.7)';
-                } else {
-                    ctx.fillStyle = 'rgba(255, 50, 50, 0.7)';
-                }
-                
-                ctx.fill();
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-                
-                // Draw HP bar
-                const hpPercent = this.hp / this.maxHp;
-                const barWidth = this.radius * 2;
-                const barHeight = 8;
-                const barY = this.y - this.radius - 15;
-                
-                ctx.fillStyle = 'red';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-                
-                ctx.fillStyle = 'green';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth * hpPercent, barHeight);
-                
-                // Draw name
-                ctx.fillStyle = 'white';
-                ctx.font = '12px Arial';
-                ctx.textAlign = 'center';
-                ctx.fillText(this.name, this.x, this.y + this.radius + 15);
-                
-                // Draw level
-                ctx.fillStyle = 'gold';
-                ctx.font = 'bold 14px Arial';
-                ctx.fillText(this.level, this.x, this.y - this.radius - 20);
-                
-                // Draw effects
-                for (let effect of this.effects) {
-                    switch (effect.type) {
-                        case 'stun':
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.radius + 5, 0, Math.PI * 2);
-                            ctx.strokeStyle = 'yellow';
-                            ctx.lineWidth = 3;
-                            ctx.stroke();
-                            break;
-                        case 'boost':
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.radius + 3, 0, Math.PI * 2);
-                            ctx.strokeStyle = 'orange';
-                            ctx.lineWidth = 2;
-                            ctx.stroke();
-                            break;
-                        case 'transform':
-                            ctx.beginPath();
-                            ctx.arc(this.x, this.y, this.radius + 7, 0, Math.PI * 2);
-                            ctx.strokeStyle = 'red';
-                            ctx.lineWidth = 4;
-                            ctx.stroke();
-                            break;
-                    }
-                }
-            }
-        }
-
-        // Kelas Minion
-        class Minion {
-            constructor(team, x, y) {
-                this.team = team;
-                this.x = x;
-                this.y = y;
-                this.radius = 15;
-                this.hp = 1000;
-                this.maxHp = 1000;
-                this.damage = 1;
-                this.speed = 2;
-                this.target = null;
-                this.destination = null;
-            }
-            
-            update() {
-                // Simple AI: move towards enemy base
-                if (this.team === 'blue') {
-                    this.destination = { x: 1800, y: 400 };
-                } else {
-                    this.destination = { x: 200, y: 400 };
-                }
-                
-                // Move towards destination
-                if (this.destination) {
-                    const dx = this.destination.x - this.x;
-                    const dy = this.destination.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance > 5) {
-                        const moveX = (dx / distance) * this.speed;
-                        const moveY = (dy / distance) * this.speed;
-                        
-                        this.x += moveX;
-                        this.y += moveY;
-                    }
-                }
-                
-                // Find nearest enemy to attack
-                if (!this.target) {
-                    let nearestEnemy = null;
-                    let minDistance = Infinity;
-                    
-                    for (let obj of gameObjects) {
-                        if (obj.team !== this.team && (obj instanceof Player || obj instanceof Minion)) {
-                            const dx = obj.x - this.x;
-                            const dy = obj.y - this.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (distance < 100 && distance < minDistance) { // Attack range
-                                minDistance = distance;
-                                nearestEnemy = obj;
-                            }
-                        }
-                    }
-                    
-                    this.target = nearestEnemy;
-                }
-                
-                // Attack target if in range
-                if (this.target) {
-                    const dx = this.target.x - this.x;
-                    const dy = this.target.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < 100) {
-                        this.target.takeDamage(this.damage, this);
-                    } else {
-                        this.target = null;
-                    }
-                }
-            }
-            
-            takeDamage(amount, source) {
-                this.hp -= amount;
-                
-                if (this.hp <= 0) {
-                    // Give gold and XP to killer
-                    if (source && source instanceof Player) {
-                        source.gold += 25;
-                        source.experience += 100;
-                        
-                        // Check for level up
-                        while (source.experience >= source.level * 1000) {
-                            source.experience -= source.level * 1000;
-                            source.level++;
-                            source.maxHp += 500;
-                            source.hp = source.maxHp;
-                            source.damage += 20;
-                        }
-                    }
-                    
-                    // Remove minion
-                    const index = minions.indexOf(this);
-                    if (index > -1) {
-                        minions.splice(index, 1);
-                    }
-                }
-            }
-            
-            draw() {
-                // Draw minion
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                
-                if (this.team === 'blue') {
-                    ctx.fillStyle = 'rgba(0, 150, 255, 0.8)';
-                } else {
-                    ctx.fillStyle = 'rgba(255, 80, 80, 0.8)';
-                }
-                
-                ctx.fill();
-                
-                // Draw HP bar
-                const hpPercent = this.hp / this.maxHp;
-                const barWidth = this.radius * 2;
-                const barHeight = 4;
-                const barY = this.y - this.radius - 8;
-                
-                ctx.fillStyle = 'red';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-                
-                ctx.fillStyle = 'green';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth * hpPercent, barHeight);
-            }
-        }
-
-        // Kelas Turret
-        class Turret {
-            constructor(team, x, y) {
-                this.team = team;
-                this.x = x;
-                this.y = y;
-                this.radius = 50;
-                this.hp = 2000;
-                this.maxHp = 2000;
-                this.damage = 900;
-                this.range = 300;
-                this.target = null;
-                this.attackCooldown = 0;
-            }
-            
-            update(deltaTime) {
-                this.attackCooldown = Math.max(0, this.attackCooldown - deltaTime);
-                
-                // Find target
-                if (!this.target) {
-                    // Prioritize minions in range
-                    for (let minion of minions) {
-                        if (minion.team !== this.team) {
-                            const dx = minion.x - this.x;
-                            const dy = minion.y - this.y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            
-                            if (distance < this.range) {
-                                this.target = minion;
-                                break;
-                            }
-                        }
-                    }
-                    
-                    // If no minions, target players
-                    if (!this.target) {
-                        for (let player of players) {
-                            if (player.team !== this.team) {
-                                const dx = player.x - this.x;
-                                const dy = player.y - this.y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                
-                                if (distance < this.range) {
-                                    this.target = player;
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                }
-                
-                // Attack target if in range
-                if (this.target && this.attackCooldown <= 0) {
-                    const dx = this.target.x - this.x;
-                    const dy = this.target.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < this.range) {
-                        this.target.takeDamage(this.damage, this);
-                        this.attackCooldown = 1; // 1 second cooldown
-                    } else {
-                        this.target = null;
-                    }
-                }
-            }
-            
-            takeDamage(amount, source) {
-                this.hp -= amount;
-                
-                if (this.hp <= 0) {
-                    // Give gold to killer
-                    if (source && source instanceof Player) {
-                        source.gold += 500;
-                    }
-                    
-                    // Remove turret
-                    const index = turrets.indexOf(this);
-                    if (index > -1) {
-                        turrets.splice(index, 1);
-                    }
-                }
-            }
-            
-            draw() {
-                // Draw turret base
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                
-                if (this.team === 'blue') {
-                    ctx.fillStyle = 'rgba(0, 100, 255, 0.7)';
-                } else {
-                    ctx.fillStyle = 'rgba(255, 50, 50, 0.7)';
-                }
-                
-                ctx.fill();
-                
-                // Draw turret tower
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, 20, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(200, 200, 200, 0.9)';
-                ctx.fill();
-                
-                // Draw range circle (only if player is nearby)
-                let playerNearby = false;
-                for (let player of players) {
-                    const dx = player.x - this.x;
-                    const dy = player.y - this.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
-                    
-                    if (distance < this.range + 50) {
-                        playerNearby = true;
-                        break;
-                    }
-                }
-                
-                if (playerNearby) {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.range, 0, Math.PI * 2);
-                    ctx.strokeStyle = 'rgba(255, 255, 0, 0.3)';
-                    ctx.lineWidth = 2;
-                    ctx.stroke();
-                }
-                
-                // Draw HP bar
-                const hpPercent = this.hp / this.maxHp;
-                const barWidth = this.radius * 2;
-                const barHeight = 10;
-                const barY = this.y - this.radius - 15;
-                
-                ctx.fillStyle = 'red';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-                
-                ctx.fillStyle = 'green';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth * hpPercent, barHeight);
-            }
-        }
-
-        // Kelas Buff
-        class Buff {
-            constructor(x, y) {
-                this.x = x;
-                this.y = y;
-                this.radius = 40;
-                this.hp = 4000;
-                this.maxHp = 4000;
-                this.damage = 30;
-                this.team = 'neutral';
-            }
-            
-            update() {
-                // Buff doesn't move, just exists
-            }
-            
-            takeDamage(amount, source) {
-                this.hp -= amount;
-                
-                if (this.hp <= 0) {
-                    // Give gold and buff to killer
-                    if (source && source instanceof Player) {
-                        source.gold += 150;
-                        source.addEffect('buff', 30); // 30 second buff
-                    }
-                    
-                    // Remove buff
-                    const index = buffs.indexOf(this);
-                    if (index > -1) {
-                        buffs.splice(index, 1);
-                    }
-                    
-                    // Respawn buff after 60 seconds
-                    setTimeout(() => {
-                        buffs.push(new Buff(this.x, this.y));
-                    }, 60000);
-                }
-            }
-            
-            draw() {
-                // Draw buff
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 255, 0, 0.7)';
-                ctx.fill();
-                
-                // Draw symbol
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 20px Arial';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('B', this.x, this.y);
-                
-                // Draw HP bar
-                const hpPercent = this.hp / this.maxHp;
-                const barWidth = this.radius * 2;
-                const barHeight = 8;
-                const barY = this.y - this.radius - 10;
-                
-                ctx.fillStyle = 'red';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth, barHeight);
-                
-                ctx.fillStyle = 'green';
-                ctx.fillRect(this.x - barWidth/2, barY, barWidth * hpPercent, barHeight);
-            }
-        }
-
-        // Kelas Projectile
-        class Projectile {
-            constructor(startX, startY, targetX, targetY, damage, team, source) {
-                this.x = startX;
-                this.y = startY;
-                this.targetX = targetX;
-                this.targetY = targetY;
-                this.damage = damage;
-                this.team = team;
-                this.source = source;
-                this.speed = 10;
-                this.radius = 5;
-                
-                // Calculate direction
-                const dx = targetX - startX;
-                const dy = targetY - startY;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-                
-                this.directionX = dx / distance;
-                this.directionY = dy / distance;
-            }
-            
-            update() {
-                // Move towards target
-                this.x += this.directionX * this.speed;
-                this.y += this.directionY * this.speed;
-                
-                // Check if hit target
-                for (let obj of gameObjects) {
-                    if (obj.team !== this.team && (obj instanceof Player || obj instanceof Minion)) {
-                        const dx = obj.x - this.x;
-                        const dy = obj.y - this.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if (distance < obj.radius + this.radius) {
-                            // Hit!
-                            obj.takeDamage(this.damage, this.source);
-                            
-                            // Remove projectile
-                            const index = projectiles.indexOf(this);
-                            if (index > -1) {
-                                projectiles.splice(index, 1);
-                            }
-                            return;
-                        }
-                    }
-                }
-                
-                // Check if out of bounds
-                if (this.x < 0 || this.x > 2000 || this.y < 0 || this.y > 800) {
-                    const index = projectiles.indexOf(this);
-                    if (index > -1) {
-                        projectiles.splice(index, 1);
-                    }
-                }
-            }
-            
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                
-                if (this.team === 'blue') {
-                    ctx.fillStyle = 'rgba(0, 150, 255, 0.9)';
-                } else {
-                    ctx.fillStyle = 'rgba(255, 80, 80, 0.9)';
-                }
-                
-                ctx.fill();
-            }
-        }
-
-        // Kelas SkillEffect
-        class SkillEffect {
-            constructor(x, y, duration, type) {
-                this.x = x;
-                this.y = y;
-                this.duration = duration;
-                this.type = type;
-                this.radius = 50;
-            }
-            
-            update(deltaTime) {
-                this.duration -= deltaTime;
-                
-                if (this.duration <= 0) {
-                    const index = gameObjects.indexOf(this);
-                    if (index > -1) {
-                        gameObjects.splice(index, 1);
-                    }
-                }
-            }
-            
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                
-                switch (this.type) {
-                    case 'stun':
-                        ctx.strokeStyle = 'yellow';
-                        break;
-                    case 'damage':
-                        ctx.strokeStyle = 'red';
-                        break;
-                    default:
-                        ctx.strokeStyle = 'white';
-                }
-                
-                ctx.lineWidth = 3;
-                ctx.stroke();
-            }
-        }
-
-        // Fungsi inisialisasi game
-        function initGame() {
+        // Target lock system
+        let targetLock = {
+            enabled: false,
+            target: null,
+            type: null // 'player', 'minion', 'turret'
+        };
+        
+        // Inisialisasi game
+        function init() {
             canvas = document.getElementById('game-canvas');
             ctx = canvas.getContext('2d');
             
@@ -1620,466 +600,452 @@
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             
-            // Create player
-            player = new Player(
-                currentUser, 
-                currentUser, 
-                selectedHero, 
-                playerTeam,
-                playerTeam === 'blue' ? 200 : 1800,
-                400
-            );
-            
-            players.push(player);
-            
-            // Create AI players
-            const aiHeroes = ['narto', 'saskeh', 'lord_tachi'];
-            for (let i = 0; i < 2; i++) {
-                const aiHero = aiHeroes[Math.floor(Math.random() * aiHeroes.length)];
-                const aiPlayer = new Player(
-                    `ai_${i}`,
-                    `AI_${i}`,
-                    aiHero,
-                    playerTeam,
-                    playerTeam === 'blue' ? 200 + (i * 100) : 1800 - (i * 100),
-                    400 + (i * 50),
-                    true
-                );
-                
-                players.push(aiPlayer);
-                aiPlayers.push(aiPlayer);
+            // Ambil data user
+            currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                window.location.href = 'index.html';
+                return;
             }
             
-            // Create enemy AI players
-            for (let i = 0; i < 3; i++) {
-                const aiHero = aiHeroes[Math.floor(Math.random() * aiHeroes.length)];
-                const aiPlayer = new Player(
-                    `enemy_ai_${i}`,
-                    `Enemy_${i}`,
-                    aiHero,
-                    enemyTeam,
-                    enemyTeam === 'blue' ? 200 + (i * 100) : 1800 - (i * 100),
-                    400 + (i * 50),
-                    true
-                );
-                
-                players.push(aiPlayer);
-                aiPlayers.push(aiPlayer);
-            }
-            
-            // Create turrets
-            // Blue team turrets
-            turrets.push(new Turret('blue', 400, 200));
-            turrets.push(new Turret('blue', 400, 600));
-            turrets.push(new Turret('blue', 600, 400));
-            
-            // Red team turrets
-            turrets.push(new Turret('red', 1600, 200));
-            turrets.push(new Turret('red', 1600, 600));
-            turrets.push(new Turret('red', 1400, 400));
-            
-            // Create buffs
-            buffs.push(new Buff(500, 300));
-            buffs.push(new Buff(500, 500));
-            buffs.push(new Buff(1500, 300));
-            buffs.push(new Buff(1500, 500));
-            buffs.push(new Buff(1000, 200));
-            buffs.push(new Buff(1000, 600));
-            
-            // Add all game objects to main array
-            gameObjects = [...players, ...turrets, ...buffs];
-            
-            // Start game loop
-            gameActive = true;
-            requestAnimationFrame(gameLoop);
-            
-            // Start minion spawner
-            spawnMinions();
-            
-            // Start gold/XP timer
-            setInterval(() => {
-                if (gameActive) {
-                    // Add gold and XP every 10 seconds
-                    for (let player of players) {
-                        player.gold += 50;
-                        player.experience += 400;
-                        
-                        // Check for level up
-                        while (player.experience >= player.level * 1000) {
-                            player.experience -= player.level * 1000;
-                            player.level++;
-                            player.maxHp += 500;
-                            player.hp = player.maxHp;
-                            player.damage += 20;
-                        }
-                    }
+            // Ambil data dari Firebase
+            database.ref('users/' + currentUser).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    userData = snapshot.val();
+                    selectedHero = userData.selectedHero;
+                    gameMode = userData.gameMode;
+                    
+                    // Setup player berdasarkan hero yang dipilih
+                    setupPlayer();
+                    
+                    // Setup game
+                    setupGame();
+                    
+                    // Setup event listeners
+                    setupEventListeners();
+                    
+                    // Mulai game loop
+                    requestAnimationFrame(gameLoop);
+                    
+                    // Sembunyikan loading screen
+                    setTimeout(() => {
+                        document.getElementById('loading-screen').style.display = 'none';
+                    }, 1000);
+                } else {
+                    window.location.href = 'index.html';
                 }
-            }, 10000);
+            });
         }
-
-        // Fungsi untuk spawn minion
-        function spawnMinions() {
-            if (!gameActive) return;
+        
+        // Setup player
+        function setupPlayer() {
+            const hero = heroData[selectedHero];
+            if (!hero) return;
             
-            // Spawn minions for both teams
-            for (let i = 0; i < 3; i++) {
-                minions.push(new Minion('blue', 100, 350 + i * 50));
-                minions.push(new Minion('red', 1900, 350 + i * 50));
-            }
-            
-            gameObjects = [...players, ...turrets, ...buffs, ...minions];
-            
-            // Schedule next spawn
-            setTimeout(spawnMinions, 20000);
-        }
-
-        // Game loop
-        let lastTime = 0;
-        function gameLoop(timestamp) {
-            if (!gameActive) return;
-            
-            const deltaTime = (timestamp - lastTime) / 1000;
-            lastTime = timestamp;
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw background (map)
-            drawMap();
-            
-            // Update and draw all game objects
-            for (let obj of gameObjects) {
-                obj.update(deltaTime);
-                obj.draw();
-            }
-            
-            // Update and draw projectiles
-            for (let projectile of projectiles) {
-                projectile.update();
-                projectile.draw();
-            }
-            
-            // Update UI
-            updateGameUI();
-            
-            // Check game over condition
-            checkGameOver();
-            
-            // Continue game loop
-            requestAnimationFrame(gameLoop);
-        }
-
-        // Fungsi untuk menggambar peta
-        function drawMap() {
-            // Draw background
-            ctx.fillStyle = '#1a472a';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Draw lanes
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-            ctx.lineWidth = 5;
-            
-            // Top lane
-            ctx.beginPath();
-            ctx.moveTo(200, 200);
-            ctx.lineTo(1800, 200);
-            ctx.stroke();
-            
-            // Mid lane
-            ctx.beginPath();
-            ctx.moveTo(200, 400);
-            ctx.lineTo(1800, 400);
-            ctx.stroke();
-            
-            // Bottom lane
-            ctx.beginPath();
-            ctx.moveTo(200, 600);
-            ctx.lineTo(1800, 600);
-            ctx.stroke();
-            
-            // Draw bases
-            // Blue base
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.3)';
-            ctx.fillRect(0, 200, 400, 400);
-            
-            // Red base
-            ctx.fillStyle = 'rgba(255, 50, 50, 0.3)';
-            ctx.fillRect(1600, 200, 400, 400);
-            
-            // Draw base circles
-            ctx.beginPath();
-            ctx.arc(200, 400, 100, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(0, 100, 255, 0.5)';
-            ctx.fill();
-            
-            ctx.beginPath();
-            ctx.arc(1800, 400, 100, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(255, 50, 50, 0.5)';
-            ctx.fill();
-        }
-
-        // Fungsi untuk update UI game
-        function updateGameUI() {
-            if (!player) return;
+            player.maxHp = hero.maxHp;
+            player.hp = hero.maxHp;
+            player.skills = JSON.parse(JSON.stringify(hero.skills)); // Deep copy
+            player.x = mapData.baseBlue.x;
+            player.y = mapData.baseBlue.y;
             
             // Update HP bar
-            const hpPercent = player.hp / player.maxHp;
-            document.getElementById('player-hp-fill').style.width = `${hpPercent * 100}%`;
-            
-            // Update player info
-            document.getElementById('player-name').textContent = player.name;
-            document.getElementById('player-avatar').textContent = player.name.charAt(0).toUpperCase();
-            document.getElementById('player-level').textContent = `Lv.${player.level}`;
-            document.getElementById('player-gold').textContent = player.gold;
-            document.getElementById('player-experience').textContent = `${player.experience}/${player.level * 1000}`;
-            
-            // Update skill cooldowns
-            for (let i = 0; i < player.skillCooldowns.length; i++) {
-                const cooldownElement = document.getElementById(`skill-${i+1}-cooldown`);
-                if (player.skillCooldowns[i] > 0) {
-                    cooldownElement.textContent = Math.ceil(player.skillCooldowns[i]);
-                    cooldownElement.classList.add('active');
-                } else {
-                    cooldownElement.classList.remove('active');
-                }
-            }
-            
-            // Update regen cooldown
-            const regenCooldownElement = document.getElementById('regen-cooldown');
-            if (player.regenCooldown > 0) {
-                regenCooldownElement.textContent = Math.ceil(player.regenCooldown);
-                regenCooldownElement.classList.add('active');
-            } else {
-                regenCooldownElement.classList.remove('active');
-            }
-            
-            // Update player stats
-            playerStats.kills = player.kills;
-            playerStats.deaths = player.deaths;
-            playerStats.assists = player.assists;
-            playerStats.gold = player.gold;
-            playerStats.level = player.level;
+            updateHpBar();
         }
-
-        // Fungsi untuk memeriksa kondisi game over
-        function checkGameOver() {
-            // Check if all turrets of one team are destroyed
-            let blueTurrets = 0;
-            let redTurrets = 0;
-            
-            for (let turret of turrets) {
-                if (turret.team === 'blue') blueTurrets++;
-                if (turret.team === 'red') redTurrets++;
-            }
-            
-            if (blueTurrets === 0 || redTurrets === 0) {
-                gameActive = false;
-                showGameOver(blueTurrets > 0);
-            }
-        }
-
-        // Fungsi untuk menampilkan layar game over
-        function showGameOver(victory) {
-            document.getElementById('game-over').style.display = 'flex';
-            document.getElementById('game-result').textContent = victory ? 'MENANG!' : 'KALAH';
-            document.getElementById('game-result').className = victory ? 'game-result victory' : 'game-result defeat';
-            
-            // Update stats
-            document.getElementById('stat-kills').textContent = playerStats.kills;
-            document.getElementById('stat-deaths').textContent = playerStats.deaths;
-            document.getElementById('stat-assists').textContent = playerStats.assists;
-            document.getElementById('stat-gold').textContent = playerStats.gold;
-            document.getElementById('stat-level').textContent = playerStats.level;
-            
-            // Update user data in Firebase
-            if (victory) {
-                userData.wins = (userData.wins || 0) + 1;
-                userData.rankPoints = (userData.rankPoints || 0) + 20;
-            } else {
-                userData.losses = (userData.losses || 0) + 1;
-                userData.rankPoints = Math.max(0, (userData.rankPoints || 0) - 10);
-            }
-            
-            // Update rank if needed
-            updateRank();
-            
-            // Save to Firebase
-            database.ref('users/' + currentUser).set(userData);
-        }
-
-        // Fungsi untuk update rank user
-        function updateRank() {
-            const rankData = {
-                "🥉beginner": { min: 0, max: 100, next: "🥈medium" },
-                "🥈medium": { min: 100, max: 300, next: "🥇proficient" },
-                "🥇proficient": { min: 300, max: 600, next: "🎖️Great" },
-                "🎖️Great": { min: 600, max: 1000, next: "🏅Super great" },
-                "🏅Super great": { min: 1000, max: 1500, next: "🏆Master" },
-                "🏆Master": { min: 1500, max: 2100, next: "⚜️Greatest" },
-                "⚜️Greatest": { min: 2100, max: 2800, next: "☣️No opponent" },
-                "☣️No opponent": { min: 2800, max: 9999, next: null }
-            };
-            
-            for (let rank in rankData) {
-                if (userData.rankPoints >= rankData[rank].min && userData.rankPoints < rankData[rank].max) {
-                    userData.rank = rank;
-                    break;
-                }
-            }
-        }
-
-        // Event Listeners
-        document.getElementById('start-game-btn').addEventListener('click', function() {
-            if (selectedHero) {
-                document.getElementById('hero-selection').style.display = 'none';
-                initGame();
-            }
-        });
         
-        document.getElementById('back-to-menu').addEventListener('click', function() {
-            window.location.href = 'index.html';
-        });
+        // Setup game
+        function setupGame() {
+            // Setup turrets
+            gameState.turrets = mapData.turrets.map(turret => ({ ...turret }));
+            
+            // Setup buffs
+            gameState.buffs = mapData.buffs.map(buff => ({ ...buff }));
+            
+            // Setup AI players
+            setupAIPlayers();
+            
+            // Setup minions
+            spawnMinions();
+        }
         
-        document.getElementById('shop-button').addEventListener('click', function() {
-            const shopMenu = document.getElementById('shop-menu');
-            shopMenu.classList.toggle('active');
-        });
-        
-        // Shop item clicks
-        document.querySelectorAll('.shop-item').forEach(item => {
-            item.addEventListener('click', function() {
-                const itemId = this.getAttribute('data-item');
-                buyItem(itemId);
+        // Setup AI players - DIPERBAIKI: AI tidak langsung push di awal
+        function setupAIPlayers() {
+            // AI untuk tim biru (2 AI)
+            const blueAI = [
+                { id: 'ai_blue_1', hero: 'narto', x: 300, y: 900, team: 'blue', type: 'buff', state: 'seek_buff', gold: 0, items: [], target: null, attackCooldown: 0 },
+                { id: 'ai_blue_2', hero: 'saskeh', x: 300, y: 1100, team: 'blue', type: 'defender', state: 'patrol', gold: 0, items: [], target: null, attackCooldown: 0 }
+            ];
+            
+            // AI untuk tim merah (3 AI) - DIPERBAIKI: State awal tidak langsung push
+            const redAI = [
+                { id: 'ai_red_1', hero: 'narto', x: 1700, y: 900, team: 'red', type: 'buff', state: 'seek_buff', gold: 0, items: [], target: null, attackCooldown: 0 },
+                { id: 'ai_red_2', hero: 'saskeh', x: 1700, y: 1100, team: 'red', type: 'minion', state: 'seek_gold', gold: 0, items: [], target: null, attackCooldown: 0 },
+                { id: 'ai_red_3', hero: 'lord_tachi', x: 1700, y: 1000, team: 'red', type: 'objective', state: 'seek_buff', gold: 0, items: [], target: null, attackCooldown: 0 }
+            ];
+            
+            // Gabungkan semua AI
+            gameState.players = [...blueAI, ...redAI].map(ai => {
+                const hero = heroData[ai.hero];
+                return {
+                    ...ai,
+                    radius: 25,
+                    speed: 3,
+                    maxHp: hero.maxHp,
+                    hp: hero.maxHp,
+                    damage: 50,
+                    skills: JSON.parse(JSON.stringify(hero.skills)), // Deep copy
+                    lastAttackTime: 0,
+                    alive: true // DITAMBAH: Status hidup AI
+                };
             });
-        });
+        }
         
-        // Skill clicks
-        document.getElementById('skill-1').addEventListener('click', function() {
-            if (player) player.useSkill(0);
-        });
-        
-        document.getElementById('skill-2').addEventListener('click', function() {
-            if (player) player.useSkill(1);
-        });
-        
-        document.getElementById('skill-3').addEventListener('click', function() {
-            if (player) player.useSkill(2);
-        });
-        
-        document.getElementById('regen-skill').addEventListener('click', function() {
-            if (player && player.regenCooldown <= 0) {
-                player.hp = Math.min(player.maxHp, player.hp + 1000);
-                player.regenCooldown = 30; // 30 second cooldown
-            }
-        });
-        
-        // Keyboard controls
-        document.addEventListener('keydown', function(e) {
-            if (!player) return;
+        // Setup event listeners
+        function setupEventListeners() {
+            // Joystick events
+            const joystickContainer = document.getElementById('joystick-container');
             
-            switch(e.key) {
-                case '1':
-                    player.useSkill(0);
-                    break;
-                case '2':
-                    player.useSkill(1);
-                    break;
-                case '3':
-                    player.useSkill(2);
-                    break;
-                case 'r':
-                case 'R':
-                    if (player.regenCooldown <= 0) {
-                        player.hp = Math.min(player.maxHp, player.hp + 1000);
-                        player.regenCooldown = 30;
-                    }
-                    break;
-            }
-        });
+            joystickContainer.addEventListener('touchstart', handleJoystickStart, { passive: false });
+            joystickContainer.addEventListener('touchmove', handleJoystickMove, { passive: false });
+            joystickContainer.addEventListener('touchend', handleJoystickEnd);
+            
+            // Skill buttons
+            document.getElementById('skill-1').addEventListener('touchstart', () => useSkill(1));
+            document.getElementById('skill-2').addEventListener('touchstart', () => useSkill(2));
+            document.getElementById('skill-3').addEventListener('touchstart', () => useSkill(3));
+            document.getElementById('basic-attack').addEventListener('touchstart', basicAttack);
+            
+            // Shop button
+            document.getElementById('shop-btn').addEventListener('click', openShop);
+            document.getElementById('close-shop').addEventListener('click', closeShop);
+            
+            // Back to menu button
+            document.getElementById('back-to-menu').addEventListener('click', backToMenu);
+            
+            // Window resize
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
         
-        // Joystick implementation
-        const joystickContainer = document.getElementById('joystick-container');
-        const joystickHandle = document.querySelector('.joystick-handle');
-        
-        joystickContainer.addEventListener('touchstart', handleJoystickStart);
-        joystickContainer.addEventListener('mousedown', handleJoystickStart);
-        
+        // Joystick handlers
         function handleJoystickStart(e) {
             e.preventDefault();
-            joystickActive = true;
+            if (joystick.active) return;
             
-            const rect = joystickContainer.getBoundingClientRect();
-            joystickOrigin.x = rect.left + rect.width / 2;
-            joystickOrigin.y = rect.top + rect.height / 2;
+            const touch = e.touches[0];
+            const rect = e.target.getBoundingClientRect();
             
-            document.addEventListener('touchmove', handleJoystickMove);
-            document.addEventListener('mousemove', handleJoystickMove);
-            document.addEventListener('touchend', handleJoystickEnd);
-            document.addEventListener('mouseup', handleJoystickEnd);
+            joystick.active = true;
+            joystick.touchId = touch.identifier;
+            joystick.baseX = rect.left + rect.width / 2;
+            joystick.baseY = rect.top + rect.height / 2;
+            
+            updateJoystickPosition(touch.clientX, touch.clientY);
         }
         
         function handleJoystickMove(e) {
-            if (!joystickActive) return;
+            e.preventDefault();
+            if (!joystick.active) return;
             
-            let clientX, clientY;
-            
-            if (e.type === 'touchmove') {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            } else {
-                clientX = e.clientX;
-                clientY = e.clientY;
+            // Cari touch yang sesuai
+            for (let i = 0; i < e.touches.length; i++) {
+                if (e.touches[i].identifier === joystick.touchId) {
+                    updateJoystickPosition(e.touches[i].clientX, e.touches[i].clientY);
+                    break;
+                }
             }
+        }
+        
+        function handleJoystickEnd(e) {
+            if (!joystick.active) return;
             
-            const dx = clientX - joystickOrigin.x;
-            const dy = clientY - joystickOrigin.y;
+            // Cari touch yang sesuai
+            for (let i = 0; i < e.changedTouches.length; i++) {
+                if (e.changedTouches[i].identifier === joystick.touchId) {
+                    joystick.active = false;
+                    joystick.x = 0;
+                    joystick.y = 0;
+                    updateJoystickVisual();
+                    break;
+                }
+            }
+        }
+        
+        function updateJoystickPosition(clientX, clientY) {
+            const dx = clientX - joystick.baseX;
+            const dy = clientY - joystick.baseY;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            const maxDistance = 50; // Maximum joystick movement
+            const maxDistance = 50; // Max joystick movement
             
             if (distance > maxDistance) {
-                const angle = Math.atan2(dy, dx);
-                joystickDirection.x = Math.cos(angle);
-                joystickDirection.y = Math.sin(angle);
-                
-                // Update joystick handle position
-                joystickHandle.style.transform = `translate(calc(-50% + ${joystickDirection.x * maxDistance}px), calc(-50% + ${joystickDirection.y * maxDistance}px))`;
+                joystick.x = (dx / distance) * maxDistance;
+                joystick.y = (dy / distance) * maxDistance;
             } else {
-                joystickDirection.x = dx / maxDistance;
-                joystickDirection.y = dy / maxDistance;
-                
-                // Update joystick handle position
-                joystickHandle.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+                joystick.x = dx;
+                joystick.y = dy;
             }
             
-            // Move player
-            if (player) {
-                player.x += joystickDirection.x * player.speed;
-                player.y += joystickDirection.y * player.speed;
-                
-                // Keep player within bounds
-                player.x = Math.max(player.radius, Math.min(canvas.width - player.radius, player.x));
-                player.y = Math.max(player.radius, Math.min(canvas.height - player.radius, player.y));
+            updateJoystickVisual();
+        }
+        
+        function updateJoystickVisual() {
+            const joystickElement = document.getElementById('joystick');
+            joystickElement.style.transform = `translate(calc(-50% + ${joystick.x}px), calc(-50% + ${joystick.y}px))`;
+        }
+        
+        // Skill functions
+        function useSkill(skillNum) {
+            const skillKey = `skill${skillNum}`;
+            const skill = player.skills[skillKey];
+            
+            if (skill.cooldown > 0) return;
+            
+            // Set cooldown
+            skill.cooldown = skill.maxCooldown;
+            
+            // Update UI
+            updateSkillCooldown(skillNum, skill.maxCooldown);
+            
+            // Implementasi efek skill berdasarkan hero
+            if (selectedHero === 'narto') {
+                useNartoSkill(skillNum);
+            } else if (selectedHero === 'saskeh') {
+                useSaskehSkill(skillNum);
+            }
+            // Lord Tachi skills coming soon
+        }
+        
+        function useNartoSkill(skillNum) {
+            if (skillNum === 1) {
+                // Rasengan Mini - lempar projectile yang stun musuh
+                createProjectile(player.x, player.y, 10, 5, 300, player.damage + 20, 'stun');
+            } else if (skillNum === 2) {
+                // Kyuubi Boost - buff attack speed dan damage
+                player.damage += 30;
+                setTimeout(() => {
+                    player.damage -= 30;
+                }, 2500);
+            } else if (skillNum === 3) {
+                // Mode Kurama - transformasi dengan buff besar
+                player.damage += 40;
+                setTimeout(() => {
+                    player.damage -= 40;
+                }, 5000);
             }
         }
         
-        function handleJoystickEnd() {
-            joystickActive = false;
-            joystickDirection.x = 0;
-            joystickDirection.y = 0;
-            joystickHandle.style.transform = 'translate(-50%, -50%)';
-            
-            document.removeEventListener('touchmove', handleJoystickMove);
-            document.removeEventListener('mousemove', handleJoystickMove);
-            document.removeEventListener('touchend', handleJoystickEnd);
-            document.removeEventListener('mouseup', handleJoystickEnd);
+        function useSaskehSkill(skillNum) {
+            if (skillNum === 1) {
+                // Speed Boost - meningkatkan speed
+                player.speed += 2;
+                setTimeout(() => {
+                    player.speed -= 2;
+                }, 3500);
+            } else if (skillNum === 2) {
+                // Chidori - damage besar ke musuh terdekat
+                const nearestEnemy = findNearestEnemy();
+                if (nearestEnemy && getDistance(player, nearestEnemy) < 200) {
+                    nearestEnemy.hp -= player.damage + 170;
+                    if (nearestEnemy.hp <= 0) {
+                        player.kills++;
+                        handleEnemyDeath(nearestEnemy);
+                    }
+                }
+            } else if (skillNum === 3) {
+                // Mangekyo - transformasi dengan buff
+                player.damage += 70;
+                player.speed += 0.5;
+                setTimeout(() => {
+                    player.damage -= 70;
+                    player.speed -= 0.5;
+                }, 5000);
+            }
         }
         
-        // Fungsi untuk membeli item dari shop
+        // Basic attack - DIPERBAIKI: Bisa menyerang turet dan mencari target yang terlihat di layar
+        function basicAttack() {
+            // Cek cooldown attack (3.5 detik)
+            const now = Date.now();
+            if (now - player.lastAttackTime < 3500) return;
+            
+            // Cari target terdekat dalam jarak 150 yang terlihat di layar
+            const nearestEnemy = findNearestVisibleEnemy();
+            if (nearestEnemy && getDistance(player, nearestEnemy) < 150) {
+                nearestEnemy.hp -= player.damage;
+                player.lastAttackTime = now;
+                
+                // DIPERBAIKI: Cek jika target adalah turet
+                if (nearestEnemy.hp <= 0) {
+                    if (nearestEnemy.range) { // Jika ada property range, berarti ini turet
+                        player.gold += 300; // Beri gold untuk menghancurkan turet
+                    } else {
+                        player.kills++;
+                        handleEnemyDeath(nearestEnemy);
+                    }
+                }
+            }
+        }
+        
+        // DITAMBAH: Fungsi untuk mencari musuh terdekat yang terlihat di layar
+        function findNearestVisibleEnemy() {
+            let nearest = null;
+            let minDistance = 150; // Jarak maksimum serangan
+            
+            // Cari di antara AI players yang terlihat di layar
+            gameState.players.forEach(p => {
+                if (p.team !== player.team && p.hp > 0 && p.alive) {
+                    const distance = getDistance(player, p);
+                    if (distance < minDistance && isInViewport(p.x, p.y)) {
+                        minDistance = distance;
+                        nearest = p;
+                    }
+                }
+            });
+            
+            // Cari turet musuh yang terlihat di layar
+            gameState.turrets.forEach(turret => {
+                if (turret.team !== player.team && turret.hp > 0) {
+                    const distance = getDistance(player, turret);
+                    if (distance < minDistance && isInViewport(turret.x, turret.y)) {
+                        minDistance = distance;
+                        nearest = turret;
+                    }
+                }
+            });
+            
+            // Cari minion musuh yang terlihat di layar
+            gameState.minions.forEach(minion => {
+                if (minion.team !== player.team && minion.hp > 0) {
+                    const distance = getDistance(player, minion);
+                    if (distance < minDistance && isInViewport(minion.x, minion.y)) {
+                        minDistance = distance;
+                        nearest = minion;
+                    }
+                }
+            });
+            
+            return nearest;
+        }
+        
+        // DITAMBAH: Fungsi untuk mengecek apakah objek terlihat di viewport
+        function isInViewport(x, y) {
+            return x >= camera.x && x <= camera.x + canvas.width &&
+                   y >= camera.y && y <= camera.y + canvas.height;
+        }
+        
+        // DIPERBAIKI: Fungsi handleEnemyDeath
+        function handleEnemyDeath(enemy) {
+            // Beri gold untuk kill
+            player.gold += 200;
+            
+            // Tandai enemy sebagai tidak alive
+            enemy.alive = false;
+            enemy.hp = 0;
+            
+            // Respawn enemy setelah 10 detik
+            setTimeout(() => {
+                enemy.hp = enemy.maxHp;
+                enemy.alive = true;
+                if (enemy.team === 'blue') {
+                    enemy.x = mapData.baseBlue.x;
+                    enemy.y = mapData.baseBlue.y;
+                } else {
+                    enemy.x = mapData.baseRed.x;
+                    enemy.y = mapData.baseRed.y;
+                }
+            }, 10000);
+        }
+        
+        function findNearestEnemy() {
+            let nearest = null;
+            let minDistance = Infinity;
+            
+            // Cari di antara AI players
+            gameState.players.forEach(p => {
+                if (p.team !== player.team && p.hp > 0 && p.alive) {
+                    const distance = getDistance(player, p);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearest = p;
+                    }
+                }
+            });
+            
+            return nearest;
+        }
+        
+        function createProjectile(x, y, radius, speed, range, damage, effect) {
+            const dx = joystick.x || 1;
+            const dy = joystick.y || 0;
+            const angle = Math.atan2(dy, dx);
+            
+            gameState.projectiles.push({
+                x: x,
+                y: y,
+                radius: radius,
+                speed: speed,
+                range: range,
+                damage: damage,
+                effect: effect,
+                vx: Math.cos(angle) * speed,
+                vy: Math.sin(angle) * speed,
+                distance: 0
+            });
+        }
+        
+        // Shop functions
+        function openShop() {
+            document.getElementById('shop-modal').style.display = 'flex';
+            
+            // Populate shop items
+            const shopItems = document.getElementById('shop-items');
+            shopItems.innerHTML = '';
+            
+            Object.keys(itemData).forEach(itemId => {
+                const item = itemData[itemId];
+                const itemElement = document.createElement('div');
+                itemElement.className = 'shop-item';
+                
+                itemElement.innerHTML = `
+                    <div class="shop-item-info">
+                        <div class="shop-item-name">${item.name}</div>
+                        <div class="shop-item-desc">${getItemDescription(item)}</div>
+                    </div>
+                    <div class="shop-item-price">
+                        <span>💰 ${item.price}</span>
+                    </div>
+                    <div class="buy-btn" data-item="${itemId}">BELI</div>
+                `;
+                
+                shopItems.appendChild(itemElement);
+            });
+            
+            // Add event listeners to buy buttons
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const itemId = this.getAttribute('data-item');
+                    buyItem(itemId);
+                });
+            });
+        }
+        
+        function closeShop() {
+            document.getElementById('shop-modal').style.display = 'none';
+        }
+        
+        function getItemDescription(item) {
+            if (item.effect === 'cooldown') {
+                return `Mengurangi cooldown skill sebesar ${item.value * 100}%`;
+            } else if (item.effect === 'damage') {
+                return `Menambah damage sebesar ${item.value}`;
+            } else if (item.effect === 'slow') {
+                return `Setiap 3 basic attack mengurangi speed lawan ${item.value.slow * 100}% dan attack speed ${item.value.attackSlow * 100}%, +${item.value.damage} damage`;
+            }
+            return '';
+        }
+        
         function buyItem(itemId) {
-            if (!player) return;
-            
-            const item = shopItems[itemId];
-            if (!item) return;
+            const item = itemData[itemId];
             
             if (player.gold < item.price) {
                 alert('Gold tidak cukup!');
@@ -2087,99 +1053,955 @@
             }
             
             player.gold -= item.price;
-            player.items.push(item);
+            player.items.push(itemId);
             
-            // Apply item effect
-            switch (item.effect) {
-                case 'cooldownReduction':
-                    // Reduce skill cooldowns
-                    for (let i = 0; i < player.skills.length; i++) {
-                        player.skills[i].cooldown *= (1 - item.value);
+            // Terapkan efek item
+            applyItemEffect(item);
+            
+            alert(`Anda berhasil membeli ${item.name}!`);
+            closeShop();
+        }
+        
+        function applyItemEffect(item) {
+            if (item.effect === 'cooldown') {
+                // Kurangi cooldown semua skill
+                Object.keys(player.skills).forEach(skillKey => {
+                    player.skills[skillKey].maxCooldown *= (1 - item.value);
+                });
+            } else if (item.effect === 'damage') {
+                player.damage += item.value;
+            }
+            // Efek blade_es akan diterapkan saat basic attack
+        }
+        
+        // Game loop
+        function gameLoop() {
+            update();
+            render();
+            requestAnimationFrame(gameLoop);
+        }
+        
+        function update() {
+            // Update game time
+            gameState.gameTime += 1/60;
+            
+            // Update gold setiap 10 detik
+            gameState.goldTimer += 1/60;
+            if (gameState.goldTimer >= 10) {
+                player.gold += 50;
+                player.level += 400;
+                gameState.goldTimer = 0;
+            }
+            
+            // Update minion spawn
+            gameState.minionTimer += 1/60;
+            if (gameState.minionTimer >= 20) {
+                spawnMinions();
+                gameState.minionTimer = 0;
+            }
+            
+            // Update player movement
+            if (joystick.active) {
+                player.x += (joystick.x / 50) * player.speed;
+                player.y += (joystick.y / 50) * player.speed;
+                
+                // Batasi player dalam map
+                player.x = Math.max(player.radius, Math.min(mapData.width - player.radius, player.x));
+                player.y = Math.max(player.radius, Math.min(mapData.height - player.radius, player.y));
+            }
+            
+            // Update camera untuk follow player
+            camera.x = player.x - canvas.width / 2;
+            camera.y = player.y - canvas.height / 2;
+            
+            // Batasi camera dalam map
+            camera.x = Math.max(0, Math.min(mapData.width - canvas.width, camera.x));
+            camera.y = Math.max(0, Math.min(mapData.height - canvas.height, camera.y));
+            
+            // Update skill cooldowns
+            Object.keys(player.skills).forEach((skillKey, index) => {
+                if (player.skills[skillKey].cooldown > 0) {
+                    player.skills[skillKey].cooldown -= 1/60;
+                    if (player.skills[skillKey].cooldown <= 0) {
+                        updateSkillCooldown(index + 1, 0);
+                    }
+                }
+            });
+            
+            // Update AI
+            updateAI();
+            
+            // Update projectiles
+            updateProjectiles();
+            
+            // Update minions
+            updateMinions();
+            
+            // Update turrets
+            updateTurrets();
+            
+            // Check base effects
+            checkBaseEffects();
+            
+            // Check game over condition
+            checkGameOver();
+        }
+        
+        function updateAI() {
+            gameState.players.forEach(ai => {
+                // Skip AI yang mati
+                if (!ai.alive) return;
+                
+                // Update AI state machine
+                updateAIState(ai);
+                
+                // Batasi AI dalam map
+                ai.x = Math.max(ai.radius, Math.min(mapData.width - ai.radius, ai.x));
+                ai.y = Math.max(ai.radius, Math.min(mapData.height - ai.radius, ai.y));
+                
+                // Update skill cooldowns untuk AI
+                Object.keys(ai.skills).forEach(skillKey => {
+                    if (ai.skills[skillKey].cooldown > 0) {
+                        ai.skills[skillKey].cooldown -= 1/60;
+                    }
+                });
+            });
+        }
+        
+        function updateAIState(ai) {
+            switch(ai.type) {
+                case 'buff':
+                    updateBuffAI(ai);
+                    break;
+                case 'minion':
+                    updateMinionAI(ai);
+                    break;
+                case 'objective':
+                    updateObjectiveAI(ai);
+                    break;
+                case 'defender':
+                    updateDefenderAI(ai);
+                    break;
+            }
+        }
+        
+        function updateBuffAI(ai) {
+            // State machine untuk AI buff
+            switch(ai.state) {
+                case 'seek_buff':
+                    // Cari buff tim sendiri
+                    const teamBuff = gameState.buffs.find(buff => buff.team === ai.team && buff.hp > 0);
+                    if (teamBuff) {
+                        moveTowards(ai, teamBuff.x, teamBuff.y);
+                        if (getDistance(ai, teamBuff) < 100) {
+                            ai.state = 'attack_buff';
+                        }
+                    } else {
+                        ai.state = 'seek_gold';
                     }
                     break;
                     
-                case 'damage':
-                    player.damage += item.value;
+                case 'attack_buff':
+                    const currentBuff = gameState.buffs.find(buff => buff.team === ai.team && buff.hp > 0);
+                    if (currentBuff) {
+                        // Attack buff setiap 3.5 detik
+                        const now = Date.now();
+                        if (now - ai.lastAttackTime >= 3500) {
+                            currentBuff.hp -= ai.damage;
+                            ai.lastAttackTime = now;
+                            
+                            if (currentBuff.hp <= 0) {
+                                ai.gold += currentBuff.gold;
+                                ai.state = 'seek_gold';
+                            }
+                        }
+                    } else {
+                        ai.state = 'seek_gold';
+                    }
                     break;
                     
-                case 'slow':
-                    // This would be applied when attacking
-                    // For now, we'll just increase damage slightly
-                    player.damage += 20;
+                case 'seek_gold':
+                    // Cari gold dengan membunuh minion
+                    const enemyMinion = gameState.minions.find(minion => minion.team !== ai.team);
+                    if (enemyMinion) {
+                        moveTowards(ai, enemyMinion.x, enemyMinion.y);
+                        if (getDistance(ai, enemyMinion) < 100) {
+                            ai.state = 'attack_minion';
+                        }
+                    } else {
+                        // DIPERBAIKI: Tidak langsung push, cari musuh dulu
+                        ai.state = 'seek_enemy';
+                    }
+                    break;
+                    
+                case 'attack_minion':
+                    const targetMinion = gameState.minions.find(minion => minion.team !== ai.team && getDistance(ai, minion) < 100);
+                    if (targetMinion) {
+                        const now = Date.now();
+                        if (now - ai.lastAttackTime >= 3500) {
+                            targetMinion.hp -= ai.damage;
+                            ai.lastAttackTime = now;
+                            
+                            if (targetMinion.hp <= 0) {
+                                ai.gold += 50;
+                                // Cek jika punya cukup gold untuk item
+                                if (ai.gold >= 400 && !ai.items.includes('sepatu')) {
+                                    ai.items.push('sepatu');
+                                    applyItemEffectToAI(ai, itemData['sepatu']);
+                                }
+                                // DIPERBAIKI: Tidak langsung push, cari musuh dulu
+                                ai.state = 'seek_enemy';
+                            }
+                        }
+                    } else {
+                        ai.state = 'seek_enemy';
+                    }
+                    break;
+                    
+                case 'seek_enemy':
+                    // Cari musuh untuk dibunuh
+                    const enemy = findAIEnemy(ai);
+                    if (enemy) {
+                        moveTowards(ai, enemy.x, enemy.y);
+                        if (getDistance(ai, enemy) < 150) {
+                            ai.state = 'attack_enemy';
+                        }
+                    } else {
+                        // DIPERBAIKI: Hanya push jika sudah cukup kuat atau kondisi tertentu
+                        if (ai.gold >= 800 || gameState.gameTime > 120) { // Setelah 2 menit atau punya cukup gold
+                            ai.state = 'push_turret';
+                        }
+                    }
+                    break;
+                    
+                case 'attack_enemy':
+                    const currentEnemy = findAIEnemy(ai);
+                    if (currentEnemy && getDistance(ai, currentEnemy) < 150) {
+                        const now = Date.now();
+                        if (now - ai.lastAttackTime >= 3500) {
+                            currentEnemy.hp -= ai.damage;
+                            ai.lastAttackTime = now;
+                            
+                            if (currentEnemy.hp <= 0) {
+                                ai.kills++;
+                                ai.gold += 200;
+                                handleEnemyDeath(currentEnemy);
+                                // DIPERBAIKI: Tidak langsung push setelah kill
+                                ai.state = 'seek_enemy';
+                            }
+                        }
+                    } else {
+                        ai.state = 'seek_enemy';
+                    }
+                    break;
+                    
+                case 'push_turret':
+                    // Push turet musuh
+                    const enemyTurret = gameState.turrets.find(turret => turret.team !== ai.team && turret.hp > 0);
+                    if (enemyTurret) {
+                        moveTowards(ai, enemyTurret.x, enemyTurret.y);
+                        if (getDistance(ai, enemyTurret) < 150) {
+                            ai.state = 'attack_turret';
+                        }
+                    }
+                    break;
+                    
+                case 'attack_turret':
+                    const currentTurret = gameState.turrets.find(turret => turret.team !== ai.team && turret.hp > 0);
+                    if (currentTurret && getDistance(ai, currentTurret) < 150) {
+                        const now = Date.now();
+                        if (now - ai.lastAttackTime >= 3500) {
+                            currentTurret.hp -= ai.damage;
+                            ai.lastAttackTime = now;
+                        }
+                    } else {
+                        ai.state = 'push_turret';
+                    }
                     break;
             }
-            
-            alert(`Anda berhasil membeli ${item.name}!`);
-            document.getElementById('shop-menu').classList.remove('active');
         }
-
-        // Load user data and available heroes
-        window.addEventListener('DOMContentLoaded', function() {
-            currentUser = localStorage.getItem('currentUser');
+        
+        function updateMinionAI(ai) {
+            // AI yang fokus ke minion
+            const enemyMinion = gameState.minions.find(minion => minion.team !== ai.team);
+            if (enemyMinion) {
+                moveTowards(ai, enemyMinion.x, enemyMinion.y);
+                
+                // Jika dekat, serang minion
+                if (getDistance(ai, enemyMinion) < 100) {
+                    const now = Date.now();
+                    if (now - ai.lastAttackTime >= 3500) {
+                        enemyMinion.hp -= ai.damage;
+                        ai.lastAttackTime = now;
+                    }
+                }
+            } else {
+                // Jika tidak ada minion, cari musuh
+                updateObjectiveAI(ai);
+            }
+        }
+        
+        function updateObjectiveAI(ai) {
+            // AI yang fokus ke objektif (turet, base)
+            const enemyTurret = gameState.turrets.find(turret => turret.team !== ai.team && turret.hp > 0);
+            if (enemyTurret) {
+                moveTowards(ai, enemyTurret.x, enemyTurret.y);
+                
+                // Jika dekat, serang turet
+                if (getDistance(ai, enemyTurret) < 150) {
+                    const now = Date.now();
+                    if (now - ai.lastAttackTime >= 3500) {
+                        enemyTurret.hp -= ai.damage;
+                        ai.lastAttackTime = now;
+                    }
+                }
+            } else {
+                // Jika tidak ada turet, cari base musuh
+                const enemyBase = ai.team === 'blue' ? mapData.baseRed : mapData.baseBlue;
+                moveTowards(ai, enemyBase.x, enemyBase.y);
+            }
+        }
+        
+        function updateDefenderAI(ai) {
+            // AI defender yang melindungi turet
+            const teamTurret = gameState.turrets.find(turret => turret.team === ai.team);
             
-            if (!currentUser) {
-                window.location.href = 'index.html';
-                return;
+            // Cek jika ada musuh dekat turet
+            let threat = null;
+            let minDistance = Infinity;
+            
+            // Cari player musuh
+            if (player.team !== ai.team && getDistance(player, teamTurret) < 200) {
+                const distance = getDistance(player, teamTurret);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    threat = player;
+                }
             }
             
-            // Get user data from Firebase
-            database.ref('users/' + currentUser).once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    userData = snapshot.val();
+            // Cari AI musuh
+            gameState.players.forEach(p => {
+                if (p.team !== ai.team && p.hp > 0 && p.alive && getDistance(p, teamTurret) < 200) {
+                    const distance = getDistance(p, teamTurret);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        threat = p;
+                    }
+                }
+            });
+            
+            // Cari minion musuh
+            gameState.minions.forEach(minion => {
+                if (minion.team !== ai.team && getDistance(minion, teamTurret) < 200) {
+                    const distance = getDistance(minion, teamTurret);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        threat = minion;
+                    }
+                }
+            });
+            
+            if (threat) {
+                // Ada ancaman, serang!
+                moveTowards(ai, threat.x, threat.y);
+                
+                if (getDistance(ai, threat) < 150) {
+                    const now = Date.now();
+                    if (now - ai.lastAttackTime >= 3500) {
+                        threat.hp -= ai.damage;
+                        ai.lastAttackTime = now;
+                        
+                        if (threat.hp <= 0) {
+                            if (threat !== player) {
+                                ai.kills++;
+                                handleEnemyDeath(threat);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Tidak ada ancaman, patroli di sekitar turet
+                const patrolX = teamTurret.x + Math.sin(gameState.gameTime) * 100;
+                const patrolY = teamTurret.y + Math.cos(gameState.gameTime) * 100;
+                moveTowards(ai, patrolX, patrolY);
+            }
+        }
+        
+        function findAIEnemy(ai) {
+            let nearest = null;
+            let minDistance = Infinity;
+            
+            // Cari player musuh
+            if (player.team !== ai.team && player.hp > 0) {
+                const distance = getDistance(ai, player);
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearest = player;
+                }
+            }
+            
+            // Cari AI musuh
+            gameState.players.forEach(p => {
+                if (p.team !== ai.team && p.hp > 0 && p.alive && p !== ai) {
+                    const distance = getDistance(ai, p);
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearest = p;
+                    }
+                }
+            });
+            
+            return nearest;
+        }
+        
+        function applyItemEffectToAI(ai, item) {
+            if (item.effect === 'cooldown') {
+                Object.keys(ai.skills).forEach(skillKey => {
+                    ai.skills[skillKey].maxCooldown *= (1 - item.value);
+                });
+            } else if (item.effect === 'damage') {
+                ai.damage += item.value;
+            }
+        }
+        
+        function moveTowards(obj, targetX, targetY) {
+            const dx = targetX - obj.x;
+            const dy = targetY - obj.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 0) {
+                obj.x += (dx / distance) * obj.speed;
+                obj.y += (dy / distance) * obj.speed;
+            }
+        }
+        
+        function updateProjectiles() {
+            for (let i = gameState.projectiles.length - 1; i >= 0; i--) {
+                const projectile = gameState.projectiles[i];
+                
+                // Update position
+                projectile.x += projectile.vx;
+                projectile.y += projectile.vy;
+                projectile.distance += projectile.speed;
+                
+                // Check jika sudah mencapai max range
+                if (projectile.distance >= projectile.range) {
+                    gameState.projectiles.splice(i, 1);
+                    continue;
+                }
+                
+                // Check collision dengan musuh
+                let hit = false;
+                gameState.players.forEach(enemy => {
+                    if (enemy.team !== player.team && enemy.alive && getDistance(projectile, enemy) < projectile.radius + enemy.radius) {
+                        enemy.hp -= projectile.damage;
+                        
+                        // Apply effect
+                        if (projectile.effect === 'stun') {
+                            // Stun enemy selama 3 detik
+                            enemy.speed = 0;
+                            setTimeout(() => {
+                                enemy.speed = 3;
+                            }, 3000);
+                        }
+                        
+                        hit = true;
+                    }
+                });
+                
+                // Hapus projectile jika kena musuh
+                if (hit) {
+                    gameState.projectiles.splice(i, 1);
+                }
+            }
+        }
+        
+        function updateTurrets() {
+            gameState.turrets.forEach(turret => {
+                // Cari target untuk turet (prioritas: minion > hero)
+                let target = null;
+                
+                // Cari minion musuh dalam range
+                const minionTarget = gameState.minions.find(minion => 
+                    minion.team !== turret.team && 
+                    getDistance(minion, turret) < turret.range
+                );
+                
+                if (minionTarget) {
+                    target = minionTarget;
+                } else {
+                    // Cari hero musuh dalam range
+                    if (player.team !== turret.team && getDistance(player, turret) < turret.range) {
+                        target = player;
+                    } else {
+                        const heroTarget = gameState.players.find(p => 
+                            p.team !== turret.team && 
+                            p.hp > 0 && 
+                            p.alive &&
+                            getDistance(p, turret) < turret.range
+                        );
+                        if (heroTarget) {
+                            target = heroTarget;
+                        }
+                    }
+                }
+                
+                // Jika ada target, serang dengan cooldown 3.5 detik
+                if (target) {
+                    const now = Date.now();
+                    if (now - turret.lastAttackTime >= 3500) {
+                        target.hp -= turret.damage;
+                        turret.lastAttackTime = now;
+                        
+                        if (target.hp <= 0) {
+                            if (target === player) {
+                                player.deaths++;
+                                respawnPlayer();
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function spawnMinions() {
+            // Spawn minion untuk tim biru
+            for (let i = 0; i < 3; i++) {
+                gameState.minions.push({
+                    x: mapData.baseBlue.x,
+                    y: mapData.baseBlue.y + (i - 1) * 50,
+                    radius: 15,
+                    speed: 1,
+                    hp: 100,
+                    maxHp: 100,
+                    damage: 1,
+                    team: 'blue',
+                    target: { x: mapData.baseRed.x, y: mapData.baseRed.y },
+                    lastAttackTime: 0
+                });
+            }
+            
+            // Spawn minion untuk tim merah
+            for (let i = 0; i < 3; i++) {
+                gameState.minions.push({
+                    x: mapData.baseRed.x,
+                    y: mapData.baseRed.y + (i - 1) * 50,
+                    radius: 15,
+                    speed: 1,
+                    hp: 100,
+                    maxHp: 100,
+                    damage: 1,
+                    team: 'red',
+                    target: { x: mapData.baseBlue.x, y: mapData.baseBlue.y },
+                    lastAttackTime: 0
+                });
+            }
+        }
+        
+        function updateMinions() {
+            for (let i = gameState.minions.length - 1; i >= 0; i--) {
+                const minion = gameState.minions[i];
+                
+                // Move towards target
+                moveTowards(minion, minion.target.x, minion.target.y);
+                
+                // Attack setiap 3 detik
+                const now = Date.now();
+                if (now - minion.lastAttackTime >= 3000) {
+                    // Cari musuh terdekat
+                    let enemy = null;
+                    let minDistance = 50; // Range attack
                     
-                    // Load available heroes
-                    const heroSelectionGrid = document.getElementById('hero-selection-grid');
-                    heroSelectionGrid.innerHTML = '';
-                    
-                    for (let heroId in heroData) {
-                        if (userData.heroes && userData.heroes[heroId]) {
-                            const hero = heroData[heroId];
-                            const heroCard = document.createElement('div');
-                            heroCard.className = 'hero-selection-card';
-                            heroCard.setAttribute('data-hero', heroId);
-                            
-                            heroCard.innerHTML = `
-                                <div class="hero-selection-image">
-                                    <img src="${hero.image}" alt="${hero.name}">
-                                </div>
-                                <div class="hero-selection-details">
-                                    <div class="hero-selection-name">${hero.name}</div>
-                                    <div>HP: ${hero.hp}</div>
-                                    <div>Damage: ${hero.damage}</div>
-                                    <div class="hero-selection-stats">
-                                        <div>Speed: ${hero.speed}</div>
-                                    </div>
-                                </div>
-                            `;
-                            
-                            heroCard.addEventListener('click', function() {
-                                // Deselect all heroes
-                                document.querySelectorAll('.hero-selection-card').forEach(card => {
-                                    card.classList.remove('selected');
-                                });
-                                
-                                // Select this hero
-                                this.classList.add('selected');
-                                selectedHero = heroId;
-                                
-                                // Enable start button
-                                document.getElementById('start-game-btn').disabled = false;
+                    if (minion.team === 'blue') {
+                        // Cari player merah atau AI merah
+                        if (player.team === 'red' && getDistance(minion, player) < minDistance) {
+                            enemy = player;
+                        } else {
+                            gameState.players.forEach(p => {
+                                if (p.team === 'red' && p.alive && getDistance(minion, p) < minDistance) {
+                                    enemy = p;
+                                }
                             });
-                            
-                            heroSelectionGrid.appendChild(heroCard);
+                        }
+                    } else {
+                        // Cari player biru atau AI biru
+                        if (player.team === 'blue' && getDistance(minion, player) < minDistance) {
+                            enemy = player;
+                        } else {
+                            gameState.players.forEach(p => {
+                                if (p.team === 'blue' && p.alive && getDistance(minion, p) < minDistance) {
+                                    enemy = p;
+                                }
+                            });
                         }
                     }
                     
-                    // Set player name and avatar
-                    document.getElementById('player-name').textContent = userData.username;
-                    document.getElementById('player-avatar').textContent = userData.username.charAt(0).toUpperCase();
-                    
-                } else {
-                    // User doesn't exist, redirect to login
-                    window.location.href = 'index.html';
+                    // Jika ada musuh, serang
+                    if (enemy) {
+                        enemy.hp -= minion.damage;
+                        minion.lastAttackTime = now;
+                    }
+                }
+                
+                // Hapus minion jika sampai di base lawan atau mati
+                if (minion.hp <= 0 || getDistance(minion, minion.target) < 50) {
+                    gameState.minions.splice(i, 1);
+                }
+            }
+        }
+        
+        function checkBaseEffects() {
+            // Check jika player di base sendiri
+            if (getDistance(player, mapData.baseBlue) < mapData.baseBlue.radius) {
+                // Regenerasi HP
+                player.hp = Math.min(player.maxHp, player.hp + 100);
+                updateHpBar();
+            }
+            
+            // Check jika player di base musuh
+            if (getDistance(player, mapData.baseRed) < mapData.baseRed.radius) {
+                // Kurangi HP
+                player.hp -= 100;
+                updateHpBar();
+                
+                // Check jika player mati
+                if (player.hp <= 0) {
+                    player.deaths++;
+                    respawnPlayer();
+                }
+            }
+            
+            // Check untuk AI players
+            gameState.players.forEach(ai => {
+                if (ai.alive && getDistance(ai, mapData.baseBlue) < mapData.baseBlue.radius && ai.team === 'blue') {
+                    ai.hp = Math.min(ai.maxHp, ai.hp + 100);
+                }
+                
+                if (ai.alive && getDistance(ai, mapData.baseRed) < mapData.baseRed.radius && ai.team === 'red') {
+                    ai.hp = Math.min(ai.maxHp, ai.hp + 100);
                 }
             });
-        });
+        }
+        
+        function respawnPlayer() {
+            player.hp = player.maxHp;
+            player.x = mapData.baseBlue.x;
+            player.y = mapData.baseBlue.y;
+            updateHpBar();
+        }
+        
+        function checkGameOver() {
+            // Check jika base musuh hancur
+            const redTurret = gameState.turrets.find(turret => turret.team === 'red');
+            if (!redTurret || redTurret.hp <= 0) {
+                endGame(true); // Victory
+            }
+            
+            // Check jika base sendiri hancur
+            const blueTurret = gameState.turrets.find(turret => turret.team === 'blue');
+            if (!blueTurret || blueTurret.hp <= 0) {
+                endGame(false); // Defeat
+            }
+        }
+        
+        function endGame(victory) {
+            document.getElementById('game-result').textContent = victory ? 'VICTORY!' : 'DEFEAT';
+            document.getElementById('game-result').style.color = victory ? 'gold' : 'red';
+            
+            document.getElementById('stat-kills').textContent = player.kills;
+            document.getElementById('stat-deaths').textContent = player.deaths;
+            document.getElementById('stat-assists').textContent = player.assists;
+            document.getElementById('stat-gold').textContent = player.gold;
+            
+            document.getElementById('game-over-modal').style.display = 'flex';
+            
+            // Update statistik ke Firebase
+            if (userData) {
+                if (victory) {
+                    userData.wins = (userData.wins || 0) + 1;
+                } else {
+                    userData.losses = (userData.losses || 0) + 1;
+                }
+                
+                // Update rank points
+                userData.rankPoints = (userData.rankPoints || 0) + (victory ? 25 : -10);
+                
+                // Update ke database
+                database.ref('users/' + currentUser).set(userData);
+            }
+        }
+        
+        function backToMenu() {
+            window.location.href = 'index.html';
+        }
+        
+        function updateHpBar() {
+            const hpPercent = (player.hp / player.maxHp) * 100;
+            document.getElementById('player-hp-bar').style.width = `${hpPercent}%`;
+        }
+        
+        function updateSkillCooldown(skillNum, cooldown) {
+            const cooldownElement = document.getElementById(`cooldown-${skillNum}`);
+            const skillElement = document.getElementById(`skill-${skillNum}`);
+            
+            if (cooldown > 0) {
+                cooldownElement.style.display = 'flex';
+                cooldownElement.textContent = cooldown.toFixed(1);
+                skillElement.style.opacity = '0.5';
+            } else {
+                cooldownElement.style.display = 'none';
+                skillElement.style.opacity = '1';
+            }
+        }
+        
+        function getDistance(obj1, obj2) {
+            const dx = obj1.x - obj2.x;
+            const dy = obj1.y - obj2.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+        
+        // Render function
+        function render() {
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Apply camera transformation
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+            
+            // Draw map background
+            drawMap();
+            
+            // Draw bases
+            drawBase(mapData.baseBlue, 'blue');
+            drawBase(mapData.baseRed, 'red');
+            
+            // Draw turrets
+            gameState.turrets.forEach(turret => {
+                drawTurret(turret);
+            });
+            
+            // Draw buffs
+            gameState.buffs.forEach(buff => {
+                drawBuff(buff);
+            });
+            
+            // Draw minions
+            gameState.minions.forEach(minion => {
+                drawMinion(minion);
+            });
+            
+            // Draw players (hanya yang alive)
+            drawPlayer(player);
+            gameState.players.forEach(ai => {
+                if (ai.alive) {
+                    drawPlayer(ai);
+                }
+            });
+            
+            // Draw projectiles
+            gameState.projectiles.forEach(projectile => {
+                drawProjectile(projectile);
+            });
+            
+            ctx.restore();
+            
+            // Draw minimap
+            drawMinimap();
+        }
+        
+        function drawMap() {
+            // Draw grass background
+            ctx.fillStyle = '#1a5c1a';
+            ctx.fillRect(0, 0, mapData.width, mapData.height);
+            
+            // Draw lanes
+            ctx.strokeStyle = '#8B4513';
+            ctx.lineWidth = 10;
+            
+            // Top lane
+            ctx.beginPath();
+            ctx.moveTo(mapData.baseBlue.x, mapData.baseBlue.y - 200);
+            ctx.lineTo(mapData.baseRed.x, mapData.baseRed.y - 200);
+            ctx.stroke();
+            
+            // Mid lane
+            ctx.beginPath();
+            ctx.moveTo(mapData.baseBlue.x, mapData.baseBlue.y);
+            ctx.lineTo(mapData.baseRed.x, mapData.baseRed.y);
+            ctx.stroke();
+            
+            // Bottom lane
+            ctx.beginPath();
+            ctx.moveTo(mapData.baseBlue.x, mapData.baseBlue.y + 200);
+            ctx.lineTo(mapData.baseRed.x, mapData.baseRed.y + 200);
+            ctx.stroke();
+            
+            // Draw jungle areas
+            ctx.fillStyle = '#0f3d0f';
+            ctx.fillRect(400, 400, 400, 400);
+            ctx.fillRect(400, 1200, 400, 400);
+            ctx.fillRect(1200, 400, 400, 400);
+            ctx.fillRect(1200, 1200, 400, 400);
+        }
+        
+        function drawBase(base, team) {
+            ctx.fillStyle = team === 'blue' ? 'rgba(0, 0, 255, 0.3)' : 'rgba(255, 0, 0, 0.3)';
+            ctx.beginPath();
+            ctx.arc(base.x, base.y, base.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.strokeStyle = team === 'blue' ? 'blue' : 'red';
+            ctx.lineWidth = 5;
+            ctx.stroke();
+        }
+        
+        function drawTurret(turret) {
+            ctx.fillStyle = turret.team === 'blue' ? 'blue' : 'red';
+            ctx.beginPath();
+            ctx.arc(turret.x, turret.y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw turret range jika player dekat
+            if (getDistance(player, turret) < 200) {
+                ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(turret.x, turret.y, turret.range, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            
+            // Draw HP bar
+            const hpPercent = turret.hp / 2000;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(turret.x - 30, turret.y - 40, 60, 5);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(turret.x - 30, turret.y - 40, 60 * hpPercent, 5);
+        }
+        
+        function drawBuff(buff) {
+            if (buff.hp <= 0) return;
+            
+            ctx.fillStyle = buff.team === 'blue' ? 'lightblue' : 'pink';
+            ctx.beginPath();
+            ctx.arc(buff.x, buff.y, 25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('BUFF', buff.x, buff.y + 5);
+            
+            // Draw HP bar
+            const hpPercent = buff.hp / 4000;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(buff.x - 25, buff.y - 35, 50, 5);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(buff.x - 25, buff.y - 35, 50 * hpPercent, 5);
+        }
+        
+        function drawMinion(minion) {
+            ctx.fillStyle = minion.team === 'blue' ? 'lightblue' : 'pink';
+            ctx.beginPath();
+            ctx.arc(minion.x, minion.y, minion.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw HP bar
+            const hpPercent = minion.hp / minion.maxHp;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(minion.x - minion.radius, minion.y - minion.radius - 10, minion.radius * 2, 3);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(minion.x - minion.radius, minion.y - minion.radius - 10, minion.radius * 2 * hpPercent, 3);
+        }
+        
+        function drawPlayer(p) {
+            // Draw player circle
+            ctx.fillStyle = p.team === 'blue' ? 'blue' : 'red';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw player image (placeholder)
+            ctx.fillStyle = 'white';
+            ctx.font = '16px Arial';
+            ctx.textAlign = 'center';
+            
+            if (p === player) {
+                // Player utama
+                ctx.fillText(selectedHero.toUpperCase(), p.x, p.y + 5);
+            } else {
+                // AI player
+                ctx.fillText(p.hero.toUpperCase(), p.x, p.y + 5);
+            }
+            
+            // Draw HP bar
+            const hpPercent = p.hp / p.maxHp;
+            ctx.fillStyle = 'red';
+            ctx.fillRect(p.x - p.radius, p.y - p.radius - 15, p.radius * 2, 5);
+            ctx.fillStyle = 'green';
+            ctx.fillRect(p.x - p.radius, p.y - p.radius - 15, p.radius * 2 * hpPercent, 5);
+        }
+        
+        function drawProjectile(projectile) {
+            ctx.fillStyle = 'yellow';
+            ctx.beginPath();
+            ctx.arc(projectile.x, projectile.y, projectile.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+        
+        function drawMinimap() {
+            const minimap = document.getElementById('minimap');
+            const minimapCtx = minimap.getContext('2d');
+            
+            // Clear minimap
+            minimapCtx.clearRect(0, 0, minimap.width, minimap.height);
+            
+            // Draw minimap background
+            minimapCtx.fillStyle = '#1a5c1a';
+            minimapCtx.fillRect(0, 0, minimap.width, minimap.height);
+            
+            // Calculate scale
+            const scaleX = minimap.width / mapData.width;
+            const scaleY = minimap.height / mapData.height;
+            
+            // Draw bases
+            minimapCtx.fillStyle = 'blue';
+            minimapCtx.beginPath();
+            minimapCtx.arc(mapData.baseBlue.x * scaleX, mapData.baseBlue.y * scaleY, 5, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            minimapCtx.fillStyle = 'red';
+            minimapCtx.beginPath();
+            minimapCtx.arc(mapData.baseRed.x * scaleX, mapData.baseRed.y * scaleY, 5, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            // Draw player
+            minimapCtx.fillStyle = player.team === 'blue' ? 'lightblue' : 'pink';
+            minimapCtx.beginPath();
+            minimapCtx.arc(player.x * scaleX, player.y * scaleY, 3, 0, Math.PI * 2);
+            minimapCtx.fill();
+            
+            // Draw other players (hanya yang alive)
+            gameState.players.forEach(p => {
+                if (p.alive) {
+                    minimapCtx.fillStyle = p.team === 'blue' ? 'lightblue' : 'pink';
+                    minimapCtx.beginPath();
+                    minimapCtx.arc(p.x * scaleX, p.y * scaleY, 2, 0, Math.PI * 2);
+                    minimapCtx.fill();
+                }
+            });
+            
+            // Draw turrets
+            gameState.turrets.forEach(turret => {
+                minimapCtx.fillStyle = turret.team === 'blue' ? 'blue' : 'red';
+                minimapCtx.beginPath();
+                minimapCtx.arc(turret.x * scaleX, turret.y * scaleY, 2, 0, Math.PI * 2);
+                minimapCtx.fill();
+            });
+        }
+        
+        // Mulai game
+        window.addEventListener('load', init);
     </script>
 </body>
 </html>
