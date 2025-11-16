@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game by Taher - Moba Mini</title>
+    <title>Menu Scene - File Utama</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
@@ -443,6 +443,199 @@
             border-radius: 5px;
             cursor: pointer;
         }
+
+        /* Leaderboard Section */
+        .leaderboard-list {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+
+        .leaderboard-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+
+        .leaderboard-item.top-3 {
+            background: linear-gradient(45deg, rgba(255, 215, 0, 0.3), rgba(255, 255, 255, 0.1));
+            border: 2px solid gold;
+        }
+
+        .leaderboard-rank {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-right: 15px;
+            color: gold;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .leaderboard-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff8a00, #ff2070);
+            margin-right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .leaderboard-info {
+            flex: 1;
+        }
+
+        .leaderboard-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .leaderboard-points {
+            margin-right: 15px;
+        }
+
+        .leaderboard-rank-name {
+            color: gold;
+        }
+
+        .leaderboard-player-highlight {
+            background: linear-gradient(45deg, rgba(0, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+            border: 2px solid #00ffff;
+        }
+        
+        /* Modal Pemilihan Hero */
+        #hero-selection-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .hero-selection-content {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 2px solid gold;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+        }
+
+        .hero-selection-title {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 20px;
+            color: gold;
+        }
+
+        .hero-selection-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .hero-selection-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .hero-selection-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .hero-selection-card.selected {
+            border-color: gold;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+
+        .hero-selection-image {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .hero-selection-name {
+            font-size: 1.2rem;
+            color: gold;
+            margin-bottom: 5px;
+        }
+
+        .hero-selection-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .hero-selection-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .hero-selection-confirm {
+            background: linear-gradient(to right, #00b09b, #96c93d);
+            color: white;
+        }
+
+        .hero-selection-cancel {
+            background: linear-gradient(to right, #ff416c, #ff4b2b);
+            color: white;
+        }
+
+        .hero-selection-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .hero-selection-btn:not(:disabled):hover {
+            transform: scale(1.05);
+        }
+
+        .no-hero-message {
+            text-align: center;
+            padding: 20px;
+            color: #ccc;
+            font-size: 1.1rem;
+        }
         
         /* Responsive */
         @media (max-width: 768px) {
@@ -461,6 +654,20 @@
             
             .profile-stats, .rank-stats {
                 grid-template-columns: 1fr;
+            }
+
+            .leaderboard-stats {
+                flex-direction: column;
+                gap: 5px;
+            }
+            
+            .leaderboard-item {
+                padding: 10px;
+            }
+            
+            .leaderboard-rank {
+                font-size: 1.2rem;
+                min-width: 25px;
             }
         }
     </style>
@@ -517,6 +724,10 @@
                         <span class="menu-icon">🏆</span>
                         <span>Rank</span>
                     </div>
+                    <div class="menu-item" data-section="leaderboard">
+                        <span class="menu-icon">📊</span>
+                        <span>Leaderboard</span>
+                    </div>
                     <div class="menu-item" data-section="friends">
                         <span class="menu-icon">👥</span>
                         <span>Teman Mabar</span>
@@ -532,7 +743,7 @@
                     <div id="home-section" class="section active">
                         <h2 class="section-title">Selamat Datang di Taher Online</h2>
                         <div style="text-align: center; margin-top: 50px;">
-                            <div class="play-btn" id="play-classic">MAIN CLASSIC</div>
+                            <div class="play-btn" id="play-war3d">MAIN WAR 3D</div>
                             <div class="play-btn" id="play-rank">MAIN RANK</div>
                         </div>
                     </div>
@@ -631,6 +842,14 @@
                         <div class="play-btn" id="play-rank-match">MAIN RANK</div>
                     </div>
 
+                    <!-- Leaderboard -->
+                    <div id="leaderboard-section" class="section">
+                        <h2 class="section-title">LEADERBOARD</h2>
+                        <div class="leaderboard-list">
+                            <!-- Daftar leaderboard akan ditampilkan di sini -->
+                        </div>
+                    </div>
+
                     <!-- Teman Mabar -->
                     <div id="friends-section" class="section">
                         <h2 class="section-title">TEMAN MABAR</h2>
@@ -662,6 +881,20 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Pemilihan Hero -->
+    <div id="hero-selection-modal">
+        <div class="hero-selection-content">
+            <h2 class="hero-selection-title">Pilih Hero Anda</h2>
+            <div id="hero-selection-list" class="hero-selection-grid">
+                <!-- Daftar hero yang dimiliki akan ditampilkan di sini -->
+            </div>
+            <div class="hero-selection-actions">
+                <button id="hero-selection-confirm" class="hero-selection-btn hero-selection-confirm" disabled>Mulai Game</button>
+                <button id="hero-selection-cancel" class="hero-selection-btn hero-selection-cancel">Batal</button>
             </div>
         </div>
     </div>
@@ -705,6 +938,8 @@
         // Variabel global
         let currentUser = null;
         let userData = null;
+        let selectedHero = null;
+        let currentGameMode = null;
 
         // Event Listeners
         document.getElementById('login-btn').addEventListener('click', login);
@@ -729,6 +964,11 @@
                 // Tampilkan section yang dipilih
                 const sectionId = this.getAttribute('data-section') + '-section';
                 document.getElementById(sectionId).classList.add('active');
+                
+                // Jika leaderboard, muat data
+                if (this.getAttribute('data-section') === 'leaderboard') {
+                    loadLeaderboard();
+                }
             });
         });
 
@@ -741,17 +981,21 @@
         });
 
         // Tombol main
-        document.getElementById('play-rank').addEventListener('click', function() {
-            window.location.href = 'main.html';
+        document.getElementById('play-war3d').addEventListener('click', function() {
+            showHeroSelection('war3d');
         });
         
-        document.getElementById('play-classic').addEventListener('click', function() {
-            alert('Mode Classic akan segera hadir!');
+        document.getElementById('play-rank').addEventListener('click', function() {
+            showHeroSelection('rank');
         });
         
         document.getElementById('play-rank-match').addEventListener('click', function() {
-            window.location.href = 'main.html';
+            showHeroSelection('rank');
         });
+
+        // Tombol modal pemilihan hero
+        document.getElementById('hero-selection-confirm').addEventListener('click', startGame);
+        document.getElementById('hero-selection-cancel').addEventListener('click', closeHeroSelection);
 
         // Fungsi login
         function login() {
@@ -925,6 +1169,265 @@
             updateUI();
             
             alert(`Selamat! Anda berhasil membeli ${hero.name}!`);
+        }
+
+        // Fungsi untuk menampilkan modal pemilihan hero
+        function showHeroSelection(gameMode) {
+            if (!userData || !userData.heroes) {
+                alert('Anda belum memiliki hero! Beli hero di shop terlebih dahulu.');
+                return;
+            }
+
+            // Cek apakah user memiliki hero
+            const ownedHeroes = Object.keys(userData.heroes).filter(heroId => userData.heroes[heroId]);
+            
+            if (ownedHeroes.length === 0) {
+                alert('Anda belum memiliki hero! Beli hero di shop terlebih dahulu.');
+                return;
+            }
+
+            currentGameMode = gameMode;
+            selectedHero = null;
+            
+            // Update daftar hero yang dimiliki
+            const heroList = document.getElementById('hero-selection-list');
+            heroList.innerHTML = '';
+            
+            ownedHeroes.forEach(heroId => {
+                const hero = heroData[heroId];
+                if (!hero) return;
+                
+                const heroCard = document.createElement('div');
+                heroCard.className = 'hero-selection-card';
+                heroCard.setAttribute('data-hero', heroId);
+                
+                heroCard.innerHTML = `
+                    <img src="${getHeroImage(heroId)}" alt="${hero.name}" class="hero-selection-image">
+                    <div class="hero-selection-name">${hero.name}</div>
+                `;
+                
+                heroCard.addEventListener('click', function() {
+                    selectHero(heroId);
+                });
+                
+                heroList.appendChild(heroCard);
+            });
+            
+            // Reset tombol konfirmasi
+            document.getElementById('hero-selection-confirm').disabled = true;
+            
+            // Tampilkan modal
+            document.getElementById('hero-selection-modal').style.display = 'flex';
+        }
+
+        // Fungsi untuk menutup modal pemilihan hero
+        function closeHeroSelection() {
+            document.getElementById('hero-selection-modal').style.display = 'none';
+            selectedHero = null;
+            currentGameMode = null;
+        }
+
+        // Fungsi untuk memilih hero
+        function selectHero(heroId) {
+            // Hapus seleksi sebelumnya
+            document.querySelectorAll('.hero-selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Tandai hero yang dipilih
+            const selectedCard = document.querySelector(`.hero-selection-card[data-hero="${heroId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
+            }
+            
+            selectedHero = heroId;
+            
+            // Aktifkan tombol konfirmasi
+            document.getElementById('hero-selection-confirm').disabled = false;
+        }
+
+        // Fungsi untuk memulai game
+        function startGame() {
+            if (!selectedHero || !currentGameMode || !currentUser) {
+                alert('Pilih hero terlebih dahulu!');
+                return;
+            }
+            
+            // Simpan hero yang dipilih ke Firebase
+            database.ref('users/' + currentUser + '/selectedHero').set(selectedHero)
+                .then(() => {
+                    // Simpan juga mode game
+                    return database.ref('users/' + currentUser + '/gameMode').set(currentGameMode);
+                })
+                .then(() => {
+                    // Simpan timestamp mulai game
+                    return database.ref('users/' + currentUser + '/gameStartTime').set(firebase.database.ServerValue.TIMESTAMP);
+                })
+                .then(() => {
+                    // Redirect ke halaman game yang sesuai
+                    if (currentGameMode === 'war3d') {
+                        window.location.href = 'Exe War.html';
+                    } else {
+                        window.location.href = 'main.html';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error menyimpan data hero:', error);
+                    alert('Terjadi kesalahan saat memulai game. Silakan coba lagi.');
+                });
+        }
+
+        // Fungsi untuk mendapatkan gambar hero berdasarkan ID
+        function getHeroImage(heroId) {
+            const images = {
+                'saskeh': 'https://b.top4top.io/p_3606vrk010.png',
+                'narto': 'https://c.top4top.io/p_36068qft31.png',
+                'lord_tachi': 'https://l.top4top.io/p_3606j9ku80.png'
+            };
+            
+            return images[heroId] || '';
+        }
+
+        // Fungsi untuk membuat data pemain random untuk leaderboard
+        function generateRandomPlayers(count) {
+            const names = [
+                "SaskehUchiha", "NartoUzumaki", "LordTachi", "SakuraHaruno", "Kakashi",
+                "Itachi", "Madara", "Obito", "Minato", "Hashirama", "Tsunade", "Jiraiya",
+                "Orochimaru", "Gaara", "RockLee", "Neji", "Shikamaru", "Choji", "Ino"
+            ];
+            
+            const players = [];
+            
+            for (let i = 0; i < count; i++) {
+                const name = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 100);
+                const rankPoints = Math.floor(Math.random() * 3000);
+                const wins = Math.floor(Math.random() * 500);
+                const losses = Math.floor(Math.random() * 200);
+                
+                // Tentukan rank berdasarkan points
+                let rank = "🥉beginner";
+                for (const [rankName, data] of Object.entries(rankData)) {
+                    if (rankPoints >= data.min && rankPoints < data.max) {
+                        rank = rankName;
+                        break;
+                    }
+                }
+                
+                players.push({
+                    username: name,
+                    rankPoints: rankPoints,
+                    rank: rank,
+                    wins: wins,
+                    losses: losses
+                });
+            }
+            
+            return players;
+        }
+
+        // Fungsi untuk memuat leaderboard
+        function loadLeaderboard() {
+            database.ref('users').once('value').then(snapshot => {
+                const users = snapshot.val();
+                const leaderboardList = document.querySelector('.leaderboard-list');
+                leaderboardList.innerHTML = '';
+                
+                let allPlayers = [];
+                
+                // Tambahkan semua pemain dari database
+                if (users) {
+                    Object.values(users).forEach(user => {
+                        if (user.username && user.rankPoints !== undefined) {
+                            allPlayers.push({
+                                username: user.username,
+                                rankPoints: user.rankPoints || 0,
+                                rank: user.rank || "🥉beginner",
+                                wins: user.wins || 0,
+                                losses: user.losses || 0,
+                                isCurrentUser: currentUser && user.username.toLowerCase() === currentUser.toLowerCase()
+                            });
+                        }
+                    });
+                }
+                
+                // Jika kurang dari 10 pemain, tambahkan pemain random
+                if (allPlayers.length < 10) {
+                    const randomPlayers = generateRandomPlayers(10 - allPlayers.length);
+                    allPlayers = allPlayers.concat(randomPlayers);
+                }
+                
+                // Urutkan berdasarkan rank points (descending)
+                allPlayers.sort((a, b) => b.rankPoints - a.rankPoints);
+                
+                // Ambil top 10
+                const top10 = allPlayers.slice(0, 10);
+                
+                // Tampilkan leaderboard
+                top10.forEach((player, index) => {
+                    const rank = index + 1;
+                    const rankIcon = player.rank.split(' ')[0];
+                    const rankName = player.rank.split(' ')[1] || player.rank;
+                    
+                    const leaderboardItem = document.createElement('div');
+                    leaderboardItem.className = `leaderboard-item ${rank <= 3 ? 'top-3' : ''} ${player.isCurrentUser ? 'leaderboard-player-highlight' : ''}`;
+                    
+                    leaderboardItem.innerHTML = `
+                        <div class="leaderboard-rank">${rank}</div>
+                        <div class="leaderboard-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${player.username} ${player.isCurrentUser ? '(Anda)' : ''}</div>
+                            <div class="leaderboard-stats">
+                                <div class="leaderboard-points">Poin: ${player.rankPoints}</div>
+                                <div class="leaderboard-rank-name">${rankIcon} ${rankName}</div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    leaderboardList.appendChild(leaderboardItem);
+                });
+                
+                // Jika tidak ada data
+                if (top10.length === 0) {
+                    leaderboardList.innerHTML = '<div class="no-hero-message">Belum ada data leaderboard</div>';
+                }
+            });
+        }
+
+        // Fungsi untuk update rank setelah menang
+        function updateRankAfterWin() {
+            if (!currentUser || !userData) return;
+            
+            // Tambah points untuk kemenangan
+            const winPoints = 25; // Points untuk menang
+            userData.rankPoints = (userData.rankPoints || 0) + winPoints;
+            userData.wins = (userData.wins || 0) + 1;
+            
+            // Update rank berdasarkan points baru
+            updatePlayerRank();
+            
+            // Simpan ke database
+            database.ref('users/' + currentUser).set(userData);
+            
+            // Update UI
+            updateUI();
+        }
+
+        // Fungsi untuk update rank player
+        function updatePlayerRank() {
+            if (!userData) return;
+            
+            const currentPoints = userData.rankPoints || 0;
+            let newRank = "🥉beginner";
+            
+            // Cari rank yang sesuai berdasarkan points
+            for (const [rankName, data] of Object.entries(rankData)) {
+                if (currentPoints >= data.min && currentPoints < data.max) {
+                    newRank = rankName;
+                    break;
+                }
+            }
+            
+            userData.rank = newRank;
         }
 
         // Cek apakah user sudah login saat memuat halaman
