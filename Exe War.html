@@ -7,8 +7,7 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-        <style>
-
+    <style>
         body {
             margin: 0;
             padding: 0;
@@ -297,6 +296,42 @@
             z-index: 181;
             pointer-events: none;
         }
+
+        /* Tombol Kembali ke Menu */
+        #back-to-menu-btn, #back-to-menu-win-btn {
+            background-color: #2196F3;
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 10px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        #back-to-menu-btn:hover, #back-to-menu-win-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        /* Rank Update Message */
+        .rank-update-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000;
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -337,22 +372,28 @@
         </div>
     </div>
 
+    <!-- Game Over Screen -->
     <div id="game-over">
         <h2>DEFFEAT❌</h2>
         <p>Kalah Mengenaskan #Taher</p>
         <button id="restart-btn">Mulai Ulang</button>
+        <button id="back-to-menu-btn">Kembali ke Menu</button>
     </div>
 
+    <!-- Game Win Screen -->
     <div id="game-win">
         <h2>VICTORY 🎉</h2>
         <p>Menang Dengan Gaya #Taher</p>
         <button id="win-restart-btn">Main Lagi</button>
+        <button id="back-to-menu-win-btn">Kembali ke Menu</button>
     </div>
+    
+    <!-- Rank Update Message -->
+    <div id="rank-update-message" class="rank-update-message"></div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-    
-       // Untuk Menjalankan Game Sesuai Pembuat @Taher
+        // ========== KONFIGURASI FIREBASE ==========
         const firebaseConfig = {
             apiKey: "AIzaSyAlMyO9iybb7Zc3-JWpaJTOU6mp7dVZw7A",
             authDomain: "taher-online.firebaseapp.com",
@@ -367,6 +408,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
+        // ========== VARIABEL GLOBAL ==========
         let playerId;
         let playersRef;
         let currentPlayerRef;
@@ -433,6 +475,91 @@
         let playerStunDuration = 2; // 2 detik
         let groundExplosions = [];
 
+        // ========== FUNGSI UPDATE RANK ==========
+        function updateRank(isWin) {
+            const currentUser = localStorage.getItem('currentUser');
+            if (!currentUser) {
+                console.log('User tidak ditemukan di localStorage');
+                return;
+            }
+
+            const userRef = database.ref('users/' + currentUser);
+            
+            userRef.once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    let { rankPoints = 0, wins = 0, losses = 0 } = userData;
+
+                    if (isWin) {
+                        // Menang: tambah points dan wins
+                        rankPoints += 25;
+                        wins += 1;
+                    } else {
+                        // Kalah: kurangi points (minimal 0) dan tambah losses
+                        rankPoints = Math.max(0, rankPoints - 15);
+                        losses += 1;
+                    }
+
+                    // Update data user
+                    userRef.update({
+                        rankPoints: rankPoints,
+                        wins: wins,
+                        losses: losses
+                    }).then(() => {
+                        console.log('Rank berhasil diupdate');
+                        
+                        // Tampilkan pesan rank update
+                        if (isWin) {
+                            showRankUpdateMessage(true, 25);
+                        } else {
+                            showRankUpdateMessage(false, 15);
+                        }
+                    }).catch(error => {
+                        console.error('Error updating rank:', error);
+                    });
+                }
+            }).catch(error => {
+                console.error('Error fetching user data:', error);
+            });
+        }
+
+        // Fungsi untuk menampilkan pesan update rank
+        function showRankUpdateMessage(isWin, points) {
+            const message = isWin ? 
+                `🎉 Rank Points +${points}!` : 
+                `💔 Rank Points -${points}`;
+            
+            const rankMessage = document.getElementById('rank-update-message');
+            rankMessage.textContent = message;
+            rankMessage.style.color = isWin ? '#00ff00' : '#ff0000';
+            rankMessage.style.display = 'block';
+            
+            // Hapus pesan setelah 3 detik
+            setTimeout(() => {
+                rankMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Fungsi kembali ke menu
+        function backToMenu() {
+            // Hapus data pemain dari Firebase saat kembali ke menu
+            if (currentPlayerRef) {
+                currentPlayerRef.remove();
+            }
+            
+            // Hapus data game state jika ini adalah pemain terakhir
+            playersRef.once('value').then(snapshot => {
+                const players = snapshot.val();
+                if (!players || Object.keys(players).length <= 1) {
+                    gameStateRef.remove();
+                    skillEventsRef.remove();
+                }
+            });
+            
+            // Redirect ke index.html
+            window.location.href = 'index.html';
+        }
+
         // ========== FUNGSI MULTIPLAYER ==========
 
         // ID Player
@@ -452,12 +579,6 @@
             console.log('Player ID:', playerId);
             document.getElementById('multiplayer-status').textContent = 'ID Kamu: ' + playerName;
             
-            // Hapus semua data pemain yang ada sebelumnya (reset room)
-            // playersRef.remove();
-            // gameStateRef.remove();
-            // skillEventsRef.remove();
-            // chatRef.remove();
-            
             // Simpan data pemain awal
             savePlayerData();
             
@@ -468,11 +589,6 @@
             playersRef.on('value', (snapshot) => {
                 const players = snapshot.val();
                 renderOtherPlayers(players);
-                
-                // Jika tidak ada pemain lain, hapus gameState
-                if (!players || Object.keys(players).length === 0) {
-                    // gameStateRef.remove();
-                }
             });
             
             // Listen untuk perubahan state game (musuh, kemenangan, kekalahan)
@@ -529,27 +645,14 @@
                 playersRef.once('value').then((snapshot) => {
                     const players = snapshot.val();
                     if (!players || Object.keys(players).length <= 1) {
-                        // gameStateRef.remove();
-                        // skillEventsRef.remove();
-                        // chatRef.remove();
+                        gameStateRef.remove();
+                        skillEventsRef.remove();
                     }
                 });
             });
             
             // Handle disconnect - hapus data pemain
             currentPlayerRef.onDisconnect().remove();
-            
-            // Jika tidak ada pemain lain setelah beberapa detik, hapus gameState
-            setTimeout(() => {
-                playersRef.once('value').then((snapshot) => {
-                    const players = snapshot.val();
-                    if (!players || Object.keys(players).length === 0) {
-                        // gameStateRef.remove();
-                        // skillEventsRef.remove();
-                        // chatRef.remove();
-                    }
-                });
-            }, 5000);
         }
 
         // Simpan data pemain ke Firebase
@@ -674,16 +777,16 @@
         function restartGame() {
             // Hapus semua data dari Firebase
             if (playersRef) {
-                // playersRef.remove();
+                playersRef.remove();
             }
             if (gameStateRef) {
-                // gameStateRef.remove();
+                gameStateRef.remove();
             }
             if (skillEventsRef) {
-                // skillEventsRef.remove();
+                skillEventsRef.remove();
             }
             if (chatRef) {
-                // chatRef.remove();
+                chatRef.remove();
             }
             
             // Hapus data pemain lokal
@@ -1031,6 +1134,9 @@
                     enemyHP = 0;
                     gameWin = true;
                     document.getElementById('game-win').style.display = 'block';
+                    
+                    // Update rank - MENANG
+                    updateRank(true);
                 }
                 
                 // Simpan state game
@@ -1254,6 +1360,10 @@
                     playerHP = 0;
                     gameOver = true;
                     document.getElementById('game-over').style.display = 'block';
+                    
+                    // Update rank - KALAH
+                    updateRank(false);
+                    
                     saveGameState();
                 }
             }
@@ -1305,6 +1415,10 @@
                     enemyHP = 0;
                     gameWin = true;
                     document.getElementById('game-win').style.display = 'block';
+                    
+                    // Update rank - MENANG
+                    updateRank(true);
+                    
                     saveGameState();
                 }
             }
@@ -1671,6 +1785,10 @@
             document.getElementById('restart-btn').addEventListener('click', restartGame);
             document.getElementById('win-restart-btn').addEventListener('click', restartGame);
             
+            // Tombol kembali ke menu
+            document.getElementById('back-to-menu-btn').addEventListener('click', backToMenu);
+            document.getElementById('back-to-menu-win-btn').addEventListener('click', backToMenu);
+            
             // Chat events
             document.getElementById('chat-toggle').addEventListener('click', toggleChat);
             document.getElementById('chat-close').addEventListener('click', toggleChat);
@@ -1899,6 +2017,10 @@
                         playerHP = 0;
                         gameOver = true;
                         document.getElementById('game-over').style.display = 'block';
+                        
+                        // Update rank - KALAH
+                        updateRank(false);
+                        
                         saveGameState();
                     }
                 }
