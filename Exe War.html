@@ -335,7 +335,7 @@
     </style>
 </head>
 <body>
-    <div id="game-title">GAME 3D MABAR @Taher</div>
+    <div id="game-title">GAME 3D MABAR</div>
     <div id="ui">
         <div id="joystick">
             <div id="joystick-handle"></div>
@@ -492,7 +492,7 @@
 
                     if (isWin) {
                         // Menang: tambah points dan wins
-                        rankPoints += 25;
+                        rankPoints += 100;
                         wins += 1;
                     } else {
                         // Kalah: kurangi points (minimal 0) dan tambah losses
@@ -510,7 +510,7 @@
                         
                         // Tampilkan pesan rank update
                         if (isWin) {
-                            showRankUpdateMessage(true, 25);
+                            showRankUpdateMessage(true, 100);
                         } else {
                             showRankUpdateMessage(false, 15);
                         }
@@ -534,10 +534,10 @@
             rankMessage.style.color = isWin ? '#00ff00' : '#ff0000';
             rankMessage.style.display = 'block';
             
-            // Hapus pesan setelah 3 detik
+            // Hapus pesan setelah 2 detik
             setTimeout(() => {
                 rankMessage.style.display = 'none';
-            }, 3000);
+            }, 2000);
         }
 
         // Fungsi kembali ke menu
