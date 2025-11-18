@@ -1435,54 +1435,59 @@
         });
     }
 
-    // Fungsi untuk update rank setelah menang di game War3D - DIPERBAIKI
+    // Fungsi bantu: simpan data user ke Firebase
+    function saveUserData() {
+        if (!currentUser || !userData) return Promise.resolve();
+        return database.ref('users/' + currentUser).set(userData);
+    }
+
+    // Fungsi bantu: ubah poin rank, update rank, simpan, dan update UI
+    function changePointsAndSave(pointsDelta, extra = {}) {
+        if (!currentUser || !userData) return;
+        // update points
+        userData.rankPoints = Math.max(0, (userData.rankPoints || 0) + pointsDelta);
+
+        // apply extras (wins/losses)
+        if (extra.win) userData.wins = (userData.wins || 0) + 1;
+        if (extra.loss) userData.losses = (userData.losses || 0) + 1;
+
+        // cek dan update rank
+        const oldRank = userData.rank;
+        updatePlayerRank(); // will set userData.rank and alert if changed
+
+        // simpan ke database lalu update UI
+        saveUserData().then(() => {
+            updateUI();
+        }).catch(err => {
+            console.error('Error saving user data:', err);
+        });
+    }
+
+    // Fungsi untuk update rank setelah menang di game War3D
     function updateRankAfterWar3dWin() {
         if (!currentUser || !userData) return;
-        
-        // Tambah points untuk kemenangan
+
         const winPoints = 100; // Points untuk menang
-        userData.rankPoints = (userData.rankPoints || 0) + winPoints;
-        userData.wins = (userData.wins || 0) + 1;
-        
-        // Update rank berdasarkan points baru
-        updatePlayerRank();
-        
-        // Simpan ke database
-        database.ref('users/' + currentUser).set(userData);
-        
-        // Update UI
-        updateUI();
-        
+        // gunakan helper untuk memastikan rank selalu diperbarui dan disimpan
+        changePointsAndSave(winPoints, { win: true });
+
         alert('Selamat! Anda memenangkan game War3D! +' + winPoints + ' Points Rank!');
     }
 
-    // Fungsi untuk update rank setelah game rank - DITAMBAHKAN
+    // Fungsi untuk update rank setelah game rank
     function updateRankAfterRankGame(isWin) {
         if (!currentUser || !userData) return;
-        
+
         let pointsChange = 0;
-        
+
         if (isWin) {
-            // Points untuk menang di rank match
             pointsChange = 50;
-            userData.wins = (userData.wins || 0) + 1;
-            userData.rankPoints = (userData.rankPoints || 0) + pointsChange;
+            changePointsAndSave(pointsChange, { win: true });
         } else {
-            // Points untuk kalah di rank match
             pointsChange = -20;
-            userData.losses = (userData.losses || 0) + 1;
-            userData.rankPoints = Math.max(0, (userData.rankPoints || 0) + pointsChange);
+            changePointsAndSave(pointsChange, { loss: true });
         }
-        
-        // Update rank berdasarkan points baru
-        updatePlayerRank();
-        
-        // Simpan ke database
-        database.ref('users/' + currentUser).set(userData);
-        
-        // Update UI
-        updateUI();
-        
+
         if (isWin) {
             alert('Selamat! Anda memenangkan Rank Match! +' + pointsChange + ' Points Rank!');
         } else {
@@ -1493,10 +1498,10 @@
     // Fungsi untuk update rank player - DIPERBAIKI
     function updatePlayerRank() {
         if (!userData) return;
-        
+
         const currentPoints = userData.rankPoints || 0;
         let newRank = "🥉 Beginner";
-        
+
         // Cari rank yang sesuai berdasarkan points
         for (const [rankName, data] of Object.entries(rankData)) {
             if (currentPoints >= data.min && currentPoints < data.max) {
@@ -1504,19 +1509,84 @@
                 break;
             }
         }
-        
-        // Cek apakah rank naik
-        if (userData.rank !== newRank && !hasShownRankUpNotification) {
+
+        // Jika rank berubah, perbarui dan tampilkan notifikasi
+        const oldRank = userData.rank || null;
+        if (oldRank !== newRank) {
             userData.rank = newRank;
-            alert('Selamat! Rank Anda naik menjadi: ' + newRank);
-            hasShownRankUpNotification = true; // Tandai bahwa notifikasi sudah ditampilkan
-        } else if (userData.rank !== newRank) {
-            // Jika rank berubah tapi notifikasi sudah pernah ditampilkan, tetap update rank
-            userData.rank = newRank;
+            try {
+                alert('Selamat! Rank Anda naik menjadi: ' + newRank);
+            } catch (e) {
+                console.log('Rank change to', newRank);
+            }
         }
     }
 
     // Cek apakah user sudah login saat memuat halaman
+    window.addEventListener('DOMContentLoaded', function() {
+        const savedUser = localStorage.getItem('currentUser');
+
+        if (savedUser) {
+            // Ambil data user dari database
+            database.ref('users/' + savedUser).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    userData = snapshot.val();
+                    currentUser = savedUser;
+
+                    // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
+                    if (currentUser.toLowerCase() === 'taher') {
+                        userData.money = 999999;
+                        userData.diamond = 999999;
+                        userData.heroes = {
+                            saskeh: true,
+                            narto: true,
+                            lord_tachi: true
+                        };
+                    }
+
+                    // Perbarui rank berdasarkan poin (jika diperlukan) dan simpan
+                    updatePlayerRank();
+                    saveUserData().catch(err => console.error('Error saving after rank sync:', err));
+
+                    updateUI();
+
+                    // Tampilkan scene utama
+                    document.getElementById('login-scene').style.display = 'none';
+                    document.getElementById('main-scene').style.display = 'block';
+                } else {
+                    localStorage.removeItem('currentUser');
+                }
+            });
+        }
+
+        // Cek apakah ada parameter menang dari game War3D
+        const urlParams = new URLSearchParams(window.location.search);
+        const war3dWin = urlParams.get('war3d_win');
+        const rankWin = urlParams.get('rank_win');
+        const rankLose = urlParams.get('rank_lose');
+
+        if (war3dWin === 'true' && currentUser) {
+            updateRankAfterWar3dWin();
+
+            // Hapus parameter dari URL
+            const url = new URL(window.location);
+            url.searchParams.delete('war3d_win');
+            window.history.replaceState({}, '', url);
+        }
+
+        if ((rankWin === 'true' || rankLose === 'true') && currentUser) {
+            updateRankAfterRankGame(rankWin === 'true');
+
+            // Hapus parameter dari URL
+            const url = new URL(window.location);
+            url.searchParams.delete('rank_win');
+            url.searchParams.delete('rank_lose');
+            window.history.replaceState({}, '', url);
+        }
+    });
+    // Cek apakah user sudah login saat memuat halaman END
+// Cek apakah user sudah login saat memuat halaman
+
     window.addEventListener('DOMContentLoaded', function() {
         const savedUser = localStorage.getItem('currentUser');
         
