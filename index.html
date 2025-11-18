@@ -904,6 +904,7 @@
         </div>
     </div>
 
+
 <script>
     // Konfigurasi Firebase
     const firebaseConfig = {
@@ -921,16 +922,16 @@
     firebase.initializeApp(firebaseConfig);
     const database = firebase.database();
 
-    // Data rank
+    // Data rank yang diperbaiki dengan kenaikan bertahap
     const rankData = {
-        "🥉beginner": { min: 0, max: 100, next: "🥈medium" },
-        "🥈medium": { min: 100, max: 300, next: "🥇proficient" },
-        "🥇proficient": { min: 300, max: 600, next: "🎖️Great" },
-        "🎖️Great": { min: 600, max: 1000, next: "🏅Super great" },
-        "🏅Super great": { min: 1000, max: 1500, next: "🏆Master" },
-        "🏆Master": { min: 1500, max: 2100, next: "⚜️Greatest" },
-        "⚜️Greatest": { min: 2100, max: 2800, next: "☣️No opponent" },
-        "☣️No opponent": { min: 2800, max: 9999, next: null }
+        "🥉 Beginner": { min: 0, max: 2000, next: "🥈 Medium" },
+        "🥈 Medium": { min: 2000, max: 5000, next: "🥇 Proficient" },
+        "🥇 Proficient": { min: 5000, max: 8000, next: "🎖️ Great" },
+        "🎖️ Great": { min: 8000, max: 12000, next: "🏅 Super great" },
+        "🏅 Super great": { min: 12000, max: 17000, next: "🏆 Master" },
+        "🏆 Master": { min: 17000, max: 23000, next: "⚜️ Greatest" },
+        "⚜️ Greatest": { min: 23000, max: 30000, next: "☣️ No opponent" },
+        "☣️ No opponent": { min: 30000, max: 999999, next: null }
     };
 
     // Data hero
@@ -945,6 +946,7 @@
     let userData = null;
     let selectedHero = null;
     let currentGameMode = null;
+    let hasShownRankUpNotification = false;
 
     // Event Listeners
     document.getElementById('login-btn').addEventListener('click', login);
@@ -1036,6 +1038,9 @@
             currentUser = username;
             localStorage.setItem('currentUser', currentUser);
             
+            // PERBAIKAN: Reset notifikasi kenaikan rank saat login
+            hasShownRankUpNotification = false;
+            
             // Update UI
             updateUI();
             
@@ -1070,7 +1075,7 @@
                 narto: false,
                 lord_tachi: false
             },
-            rank: "🥉beginner",
+            rank: "🥉 Beginner",
             rankPoints: 0,
             wins: 0,
             losses: 0
@@ -1088,8 +1093,13 @@
         document.getElementById('user-diamond').textContent = userData.diamond;
         
         // Update info rank
-        const rankIcon = userData.rank.split(' ')[0];
-        const rankName = userData.rank.split(' ')[1] || userData.rank;
+        const spaceIndex = userData.rank.indexOf(' ');
+        let rankIcon = userData.rank;
+        let rankName = userData.rank;
+        if (spaceIndex !== -1) {
+            rankIcon = userData.rank.substring(0, spaceIndex);
+            rankName = userData.rank.substring(spaceIndex + 1);
+        }
         
         document.getElementById('current-rank-icon').textContent = rankIcon;
         document.getElementById('current-rank-name').textContent = rankName;
@@ -1326,12 +1336,12 @@
         
         for (let i = 0; i < count; i++) {
             const name = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 100);
-            const rankPoints = Math.floor(Math.random() * 3000);
+            const rankPoints = Math.floor(Math.random() * 35000); // Diperbarui untuk range yang lebih tinggi
             const wins = Math.floor(Math.random() * 500);
             const losses = Math.floor(Math.random() * 200);
             
-            // Tentukan rank berdasarkan points
-            let rank = "🥉beginner";
+            // PERBAIKAN: Tentukan rank berdasarkan points dengan sistem yang sama
+            let rank = "🥉 Beginner";
             for (const [rankName, data] of Object.entries(rankData)) {
                 if (rankPoints >= data.min && rankPoints < data.max) {
                     rank = rankName;
@@ -1364,10 +1374,11 @@
             if (users) {
                 Object.values(users).forEach(user => {
                     if (user.username && user.rankPoints !== undefined) {
+                        // PERBAIKAN: Gunakan rank yang sudah tersimpan di database
                         allPlayers.push({
                             username: user.username,
                             rankPoints: user.rankPoints || 0,
-                            rank: user.rank || "🥉beginner",
+                            rank: user.rank || "🥉 Beginner",
                             wins: user.wins || 0,
                             losses: user.losses || 0,
                             isCurrentUser: currentUser && user.username.toLowerCase() === currentUser.toLowerCase()
@@ -1391,8 +1402,13 @@
             // Tampilkan leaderboard
             top10.forEach((player, index) => {
                 const rank = index + 1;
-                const rankIcon = player.rank.split(' ')[0];
-                const rankName = player.rank.split(' ')[1] || player.rank;
+                const spaceIndex2 = player.rank.indexOf(' ');
+                let rankIcon = player.rank;
+                let rankName = player.rank;
+                if (spaceIndex2 !== -1) {
+                    rankIcon = player.rank.substring(0, spaceIndex2);
+                    rankName = player.rank.substring(spaceIndex2 + 1);
+                }
                 
                 const leaderboardItem = document.createElement('div');
                 leaderboardItem.className = `leaderboard-item ${rank <= 3 ? 'top-3' : ''} ${player.isCurrentUser ? 'leaderboard-player-highlight' : ''}`;
@@ -1419,7 +1435,7 @@
         });
     }
 
-    // Fungsi untuk update rank setelah menang di game War3D
+    // Fungsi untuk update rank setelah menang di game War3D - DIPERBAIKI
     function updateRankAfterWar3dWin() {
         if (!currentUser || !userData) return;
         
@@ -1437,15 +1453,49 @@
         // Update UI
         updateUI();
         
-        alert('Selamat! Anda memenangkan game War3D!');
+        alert('Selamat! Anda memenangkan game War3D! +' + winPoints + ' Points Rank!');
     }
 
-    // Fungsi untuk update rank player
+    // Fungsi untuk update rank setelah game rank - DITAMBAHKAN
+    function updateRankAfterRankGame(isWin) {
+        if (!currentUser || !userData) return;
+        
+        let pointsChange = 0;
+        
+        if (isWin) {
+            // Points untuk menang di rank match
+            pointsChange = 50;
+            userData.wins = (userData.wins || 0) + 1;
+            userData.rankPoints = (userData.rankPoints || 0) + pointsChange;
+        } else {
+            // Points untuk kalah di rank match
+            pointsChange = -20;
+            userData.losses = (userData.losses || 0) + 1;
+            userData.rankPoints = Math.max(0, (userData.rankPoints || 0) + pointsChange);
+        }
+        
+        // Update rank berdasarkan points baru
+        updatePlayerRank();
+        
+        // Simpan ke database
+        database.ref('users/' + currentUser).set(userData);
+        
+        // Update UI
+        updateUI();
+        
+        if (isWin) {
+            alert('Selamat! Anda memenangkan Rank Match! +' + pointsChange + ' Points Rank!');
+        } else {
+            alert('Anda kalah dalam Rank Match. ' + pointsChange + ' Points Rank.');
+        }
+    }
+
+    // Fungsi untuk update rank player - DIPERBAIKI
     function updatePlayerRank() {
         if (!userData) return;
         
         const currentPoints = userData.rankPoints || 0;
-        let newRank = "🥉beginner";
+        let newRank = "🥉 Beginner";
         
         // Cari rank yang sesuai berdasarkan points
         for (const [rankName, data] of Object.entries(rankData)) {
@@ -1455,7 +1505,15 @@
             }
         }
         
-        userData.rank = newRank;
+        // Cek apakah rank naik
+        if (userData.rank !== newRank && !hasShownRankUpNotification) {
+            userData.rank = newRank;
+            alert('Selamat! Rank Anda naik menjadi: ' + newRank);
+            hasShownRankUpNotification = true; // Tandai bahwa notifikasi sudah ditampilkan
+        } else if (userData.rank !== newRank) {
+            // Jika rank berubah tapi notifikasi sudah pernah ditampilkan, tetap update rank
+            userData.rank = newRank;
+        }
     }
 
     // Cek apakah user sudah login saat memuat halaman
@@ -1480,6 +1538,10 @@
                         };
                     }
                     
+                    // PERBAIKAN: Jangan panggil updatePlayerRank() saat login
+                    // untuk menghindari notifikasi berulang
+                    // updatePlayerRank();
+                    
                     updateUI();
                     
                     // Tampilkan scene utama
@@ -1494,6 +1556,8 @@
         // Cek apakah ada parameter menang dari game War3D
         const urlParams = new URLSearchParams(window.location.search);
         const war3dWin = urlParams.get('war3d_win');
+        const rankWin = urlParams.get('rank_win');
+        const rankLose = urlParams.get('rank_lose');
         
         if (war3dWin === 'true' && currentUser) {
             updateRankAfterWar3dWin();
@@ -1501,6 +1565,16 @@
             // Hapus parameter dari URL
             const url = new URL(window.location);
             url.searchParams.delete('war3d_win');
+            window.history.replaceState({}, '', url);
+        }
+        
+        if ((rankWin === 'true' || rankLose === 'true') && currentUser) {
+            updateRankAfterRankGame(rankWin === 'true');
+            
+            // Hapus parameter dari URL
+            const url = new URL(window.location);
+            url.searchParams.delete('rank_win');
+            url.searchParams.delete('rank_lose');
             window.history.replaceState({}, '', url);
         }
     });
