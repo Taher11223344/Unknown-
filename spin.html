@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lucky Spin - Moba Mini</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .header {
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            color: gold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+        }
+        
+        .user-info {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            display: inline-block;
+            margin-bottom: 20px;
+            border: 2px solid gold;
+        }
+        
+        .spin-container {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            margin-bottom: 30px;
+            border: 3px solid gold;
+        }
+        
+        .wheel-container {
+            position: relative;
+            width: 400px;
+            height: 400px;
+            margin: 0 auto 30px;
+        }
+        
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            transition: transform 5s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+            background: #ff8a00;
+            box-shadow: 0 0 0 10px gold, 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .wheel-section {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: bottom right;
+            left: 0;
+            top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+        }
+        
+        .wheel-section:nth-child(1) {
+            background-color: #ff416c;
+            transform: rotate(0deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(2) {
+            background-color: #ff4b2b;
+            transform: rotate(45deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(3) {
+            background-color: #ff8a00;
+            transform: rotate(90deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(4) {
+            background-color: #ff2070;
+            transform: rotate(135deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(5) {
+            background-color: #1a2a6c;
+            transform: rotate(180deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(6) {
+            background-color: #b21f1f;
+            transform: rotate(225deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(7) {
+            background-color: #fdbb2d;
+            transform: rotate(270deg) skewY(-45deg);
+        }
+        
+        .wheel-section:nth-child(8) {
+            background-color: #00b09b;
+            transform: rotate(315deg) skewY(-45deg);
+        }
+        
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: gold;
+            border-radius: 50%;
+            z-index: 10;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .pointer {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 60px;
+            background: gold;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            z-index: 20;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(to right, #ff8a00, #ff2070);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 138, 0, 0.4);
+        }
+        
+        .spin-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(255, 138, 0, 0.6);
+        }
+        
+        .spin-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .bet-info {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            border: 2px solid gold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            font-size: 1.5rem;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid gold;
+        }
+        
+        .result.win {
+            background: rgba(0, 180, 155, 0.3);
+            color: #00ffaa;
+        }
+        
+        .result.lose {
+            background: rgba(255, 0, 0, 0.3);
+            color: #ff5555;
+        }
+        
+        .back-btn {
+            background: rgba(255, 0, 0, 0.7);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 20px;
+        }
+        
+        .back-btn:hover {
+            background: rgba(255, 0, 0, 0.9);
+            transform: scale(1.05);
+        }
+        
+        .prize-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .prize-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .prize-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: gold;
+        }
+        
+        .prize-chance {
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+        
+        @media (max-width: 768px) {
+            .wheel-container {
+                width: 300px;
+                height: 300px;
+            }
+            
+            .wheel-section {
+                font-size: 0.9rem;
+            }
+            
+            .prize-list {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .wheel-container {
+                width: 250px;
+                height: 250px;
+            }
+            
+            .wheel-section {
+                font-size: 0.8rem;
+            }
+            
+            .header h1 {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>LUCKY SPIN 100% DAPAT!!</h1>
+            <div class="user-info">
+                <span id="username-display">Guest</span> | 
+                <span>💎 <span id="diamond-count">0</span></span>
+            </div>
+        </div>
+        
+        <div class="spin-container">
+            <div class="wheel-container">
+                <div class="wheel" id="wheel">
+                    <div class="wheel-section">9000 COIN</div>
+                    <div class="wheel-section">300 DM</div>
+                    <div class="wheel-section">ZONK</div>
+                    <div class="wheel-section">ZONK</div>
+                    <div class="wheel-section">10 COIN</div>
+                    <div class="wheel-section">20 COIN</div>
+                    <div class="wheel-section">ZONK</div>
+                    <div class="wheel-section">10 DM</div>
+                    <div class="wheel-center">SPIN</div>
+                </div>
+                <div class="pointer"></div>
+            </div>
+            
+            <div class="controls">
+                <div class="bet-info">
+                    <span>Harga:</span>
+                    <span>💎 10</span>
+                </div>
+                <button class="spin-btn" id="spin-btn">SPIN</button>
+            </div>
+            
+            <div class="result" id="result">
+                Putar roda untuk memenangkan hadiah!
+            </div>
+        </div>
+        
+        <div class="prize-list">
+            <div class="prize-item">
+                <div class="prize-name">💎 30.000 DIAMOND 💎</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">💰 9.000 COIN 💰</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">💎 3.000 DIAMOND 💎</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">💰 2000 COIN 💰</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">💎 100 DIAMOND 💎</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">ZONK</div>
+            </div>
+            <div class="prize-item">
+                <div class="prize-name">💰 10.000 COIN 💰</div>
+            </div>
+        </div>
+        
+        <button class="back-btn" onclick="window.location.href='index.html'">Kembali ke Menu Utama</button>
+    </div>
+
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlMyO9iybb7Zc3-JWpaJTOU6mp7dVZw7A",
+            authDomain: "taher-online.firebaseapp.com",
+            databaseURL: "https://taher-online-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "taher-online",
+            storageBucket: "taher-online.firebasestorage.app",
+            messagingSenderId: "254196950669",
+            appId: "1:254196950669:web:ea7dc25e29e459e791e4c4",
+            measurementId: "G-W288VV18S2"
+        };
+
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Variabel global
+        let currentUser = null;
+        let userData = null;
+        let isSpinning = false;
+        
+        // Data hadiah dengan probabilitas
+        const prizes = [
+            { name: "3000 DM", type: "diamond", value: 3000, probability: 5 },
+            { name: "9000 COIN", type: "coin", value: 9000, probability: 10 },
+            { name: "300 DM", type: "diamond", value: 300, probability: 4 },
+            { name: "ZONK", type: "zonk", value: 0, probability: 15 },
+            { name: "ZONK", type: "zonk", value: 0, probability: 15 },
+            { name: "100 COIN", type: "coin", value: 0, probability: 10 },
+            { name: "200 COIN", type: "coin", value: 0, probability: 6 },
+            { name: "ZONK", type: "zonk", value: 0, probability: 0 }, // 0% karena sudah 20% dari dua ZONK sebelumnya
+            { name: "10 DM", type: "diamond", value: 10, probability: 50 }
+        ];
+
+        // Event Listeners
+        document.getElementById('spin-btn').addEventListener('click', spinWheel);
+
+        // Fungsi untuk memutar roda
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            // Cek apakah user sudah login
+            if (!currentUser) {
+                alert('Anda harus login terlebih dahulu!');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Cek apakah user memiliki cukup diamond
+            if (userData.diamond < 10) {
+                alert('Diamond tidak cukup!.');
+                return;
+            }
+            
+            isSpinning = true;
+            document.getElementById('spin-btn').disabled = true;
+            
+            // Kurangi 10 diamond
+            userData.diamond -= 10;
+            updateUserData();
+            
+            // Pilih hadiah berdasarkan probabilitas
+            const prizeIndex = selectPrize();
+            const prize = prizes[prizeIndex];
+            
+            // Hitung sudut putaran (5 putaran penuh + posisi hadiah)
+            const fullRotations = 5; // 5 putaran penuh
+            const segmentAngle = 45; // Setiap segmen 45 derajat
+            const targetAngle = (fullRotations * 360) + (prizeIndex * segmentAngle) + (Math.random() * segmentAngle);
+            
+            // Putar roda
+            const wheel = document.getElementById('wheel');
+            wheel.style.transform = `rotate(${targetAngle}deg)`;
+            
+            // Tampilkan hasil setelah animasi selesai
+            setTimeout(() => {
+                showResult(prize);
+                isSpinning = false;
+                document.getElementById('spin-btn').disabled = false;
+            }, 5000); // Sesuaikan dengan durasi animasi CSS
+        }
+
+        // Fungsi untuk memilih hadiah berdasarkan probabilitas
+        function selectPrize() {
+            const totalProbability = prizes.reduce((sum, prize) => sum + prize.probability, 0);
+            let random = Math.random() * totalProbability;
+            
+            for (let i = 0; i < prizes.length; i++) {
+                random -= prizes[i].probability;
+                if (random <= 0) {
+                    return i;
+                }
+            }
+            
+            return prizes.length - 1; // Fallback
+        }
+
+        // Fungsi untuk menampilkan hasil
+        function showResult(prize) {
+            const resultElement = document.getElementById('result');
+            
+            if (prize.type === 'zonk') {
+                resultElement.textContent = "ZONK, Coba lagi!";
+                resultElement.className = "result lose";
+            } else {
+                // Berikan hadiah kepada user
+                if (prize.type === 'coin') {
+                    userData.money += prize.value;
+                    resultElement.textContent = `Selamat! Anda memenangkan ${prize.value} COIN!`;
+                } else if (prize.type === 'diamond') {
+                    userData.diamond += prize.value;
+                    resultElement.textContent = `Selamat! Anda memenangkan ${prize.value} DIAMOND!`;
+                }
+                
+                resultElement.className = "result win";
+                
+                // Update data user di Firebase
+                updateUserData();
+            }
+            
+            // Update tampilan diamond
+            document.getElementById('diamond-count').textContent = userData.diamond;
+        }
+
+        // Fungsi untuk update data user di Firebase
+        function updateUserData() {
+            if (!currentUser || !userData) return;
+            
+            database.ref('users/' + currentUser).set(userData)
+                .then(() => {
+                    console.log('Data user berhasil diperbarui');
+                })
+                .catch(error => {
+                    console.error('Error memperbarui data user:', error);
+                });
+        }
+
+        // Cek apakah user sudah login saat memuat halaman
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedUser = localStorage.getItem('currentUser');
+            
+            if (savedUser) {
+                // Ambil data user dari database
+                database.ref('users/' + savedUser).once('value').then(snapshot => {
+                    if (snapshot.exists()) {
+                        userData = snapshot.val();
+                        currentUser = savedUser;
+                        
+                        // Update UI
+                        document.getElementById('username-display').textContent = userData.username;
+                        document.getElementById('diamond-count').textContent = userData.diamond;
+                    } else {
+                        // Jika data user tidak ditemukan, redirect ke login
+                        window.location.href = 'index.html';
+                    }
+                }).catch(error => {
+                    console.error('Error mengambil data user:', error);
+                    window.location.href = 'index.html';
+                });
+            } else {
+                // Jika tidak ada user yang login, redirect ke login
+                window.location.href = 'index.html';
+            }
+        });
+    </script>
+</body>
+</html>
