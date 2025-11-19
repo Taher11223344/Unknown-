@@ -746,10 +746,10 @@
                 <div class="content-area">
                     <!-- Beranda -->
                     <div id="home-section" class="section active">
-                        <h2 class="section-title">Selamat Datang di Taher Online</h2>
+                        <h2 class="section-title">Welcome, Maaf ya kalau jelek soalnya pemula</h2>
                         <div style="text-align: center; margin-top: 50px;">
-                            <div class="play-btn" id="play-war3d">MAIN WAR 3D</div>
-                            <div class="play-btn" id="play-rank">MAIN RANK</div>
+                            <div class="play-btn" id="play-war3d">PLAY - WAR EXE 3D</div>
+                            <div class="play-btn" id="play-rank">PLAY - COMING SOON</div>
                         </div>
                     </div>
 
@@ -768,7 +768,7 @@
                                     <div class="hero-price">
                                         <div class="price-tag">
                                             <span class="stat-icon">💰</span>
-                                            <span>15000</span>
+                                            <span>1000</span>
                                         </div>
                                         <div class="buy-btn" data-hero="saskeh">BELI</div>
                                     </div>
@@ -786,7 +786,7 @@
                                     <div class="hero-price">
                                         <div class="price-tag">
                                             <span class="stat-icon">💰</span>
-                                            <span>12000</span>
+                                            <span>1000</span>
                                         </div>
                                         <div class="buy-btn" data-hero="narto">BELI</div>
                                     </div>
@@ -904,750 +904,718 @@
         </div>
     </div>
 
+    <script>
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlMyO9iybb7Zc3-JWpaJTOU6mp7dVZw7A",
+            authDomain: "taher-online.firebaseapp.com",
+            databaseURL: "https://taher-online-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "taher-online",
+            storageBucket: "taher-online.firebasestorage.app",
+            messagingSenderId: "254196950669",
+            appId: "1:254196950669:web:ea7dc25e29e459e791e4c4",
+            measurementId: "G-W288VV18S2"
+        };
 
-<script>
-    // Konfigurasi Firebase
-    const firebaseConfig = {
-        apiKey: "AIzaSyAlMyO9iybb7Zc3-JWpaJTOU6mp7dVZw7A",
-        authDomain: "taher-online.firebaseapp.com",
-        databaseURL: "https://taher-online-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "taher-online",
-        storageBucket: "taher-online.firebasestorage.app",
-        messagingSenderId: "254196950669",
-        appId: "1:254196950669:web:ea7dc25e29e459e791e4c4",
-        measurementId: "G-W288VV18S2"
-    };
+        // Inisialisasi Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-    // Inisialisasi Firebase
-    firebase.initializeApp(firebaseConfig);
-    const database = firebase.database();
+        // Data rank yang diperbaiki dengan kenaikan bertahap
+        const rankData = {
+            "🥉 Beginner": { min: 0, max: 2000, next: "🥈 Medium" },
+            "🥈 Medium": { min: 2000, max: 5000, next: "🥇 Proficient" },
+            "🥇 Proficient": { min: 5000, max: 8000, next: "🎖️ Great" },
+            "🎖️ Great": { min: 8000, max: 12000, next: "🏅 Super great" },
+            "🏅 Super great": { min: 12000, max: 17000, next: "🏆 Master" },
+            "🏆 Master": { min: 17000, max: 23000, next: "⚜️ Greatest" },
+            "⚜️ Greatest": { min: 23000, max: 30000, next: "☢️ No opponent" },
+            "☢️ No opponent": { min: 30000, max: 33000, next: "☣️ Mad King" },
+            "☣️ Mad King": { min: 33000, max: 50000, next: "🏴‍☠️ Unbeatable 🏴‍☠️" },
+            "🏴‍☠️ Unbeatable 🏴‍☠️": { min: 50000, max: 100000, next: "🏴‍☠️仝 King of Monsters 仝🏴‍☠️" },
+            "🏴‍☠️仝 King of Monsters 仝🏴‍☠️": { min: 100000, max: 999999999, next: null },
+        };
 
-    // Data rank yang diperbaiki dengan kenaikan bertahap
-    const rankData = {
-        "🥉 Beginner": { min: 0, max: 2000, next: "🥈 Medium" },
-        "🥈 Medium": { min: 2000, max: 5000, next: "🥇 Proficient" },
-        "🥇 Proficient": { min: 5000, max: 8000, next: "🎖️ Great" },
-        "🎖️ Great": { min: 8000, max: 12000, next: "🏅 Super great" },
-        "🏅 Super great": { min: 12000, max: 17000, next: "🏆 Master" },
-        "🏆 Master": { min: 17000, max: 23000, next: "⚜️ Greatest" },
-        "⚜️ Greatest": { min: 23000, max: 30000, next: "☣️ No opponent" },
-        "☣️ No opponent": { min: 30000, max: 999999, next: null }
-    };
+        // Data hero
+        const heroData = {
+            "saskeh": { name: "Saskeh", price: 1000, currency: "money" },
+            "narto": { name: "Narto", price: 1000, currency: "money" },
+            "lord_tachi": { name: "Lord Tachi", price: 500, currency: "diamond" }
+        };
 
-    // Data hero
-    const heroData = {
-        "saskeh": { name: "Saskeh", price: 15000, currency: "money" },
-        "narto": { name: "Narto", price: 12000, currency: "money" },
-        "lord_tachi": { name: "Lord Tachi", price: 500, currency: "diamond" }
-    };
+        // Variabel global
+        let currentUser = null;
+        let userData = null;
+        let selectedHero = null;
+        let currentGameMode = null;
+        let rankDataFromFirebase = null;
 
-    // Variabel global
-    let currentUser = null;
-    let userData = null;
-    let selectedHero = null;
-    let currentGameMode = null;
-    let hasShownRankUpNotification = false;
-
-    // Event Listeners
-    document.getElementById('login-btn').addEventListener('click', login);
-    document.getElementById('logout-btn').addEventListener('click', logout);
-    
-    // Menu navigasi
-    document.querySelectorAll('.menu-item').forEach(item => {
-        item.addEventListener('click', function() {
-            // Hapus kelas active dari semua menu
-            document.querySelectorAll('.menu-item').forEach(i => {
-                i.classList.remove('active');
-            });
-            
-            // Tambah kelas active ke menu yang dipilih
-            this.classList.add('active');
-            
-            // Sembunyikan semua section
-            document.querySelectorAll('.section').forEach(section => {
-                section.classList.remove('active');
-            });
-            
-            // Tampilkan section yang dipilih
-            const sectionId = this.getAttribute('data-section') + '-section';
-            document.getElementById(sectionId).classList.add('active');
-            
-            // Jika leaderboard, muat data
-            if (this.getAttribute('data-section') === 'leaderboard') {
-                loadLeaderboard();
-            }
-        });
-    });
-
-    // Tombol beli hero
-    document.querySelectorAll('.buy-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const heroId = this.getAttribute('data-hero');
-            buyHero(heroId);
-        });
-    });
-
-    // Tombol main
-    document.getElementById('play-war3d').addEventListener('click', function() {
-        startWar3dGame();
-    });
-    
-    document.getElementById('play-rank').addEventListener('click', function() {
-        showHeroSelection('rank');
-    });
-    
-    document.getElementById('play-rank-match').addEventListener('click', function() {
-        showHeroSelection('rank');
-    });
-
-    // Tombol modal pemilihan hero
-    document.getElementById('hero-selection-confirm').addEventListener('click', startRankGame);
-    document.getElementById('hero-selection-cancel').addEventListener('click', closeHeroSelection);
-
-    // Fungsi login
-    function login() {
-        const username = document.getElementById('username').value.trim();
-        
-        if (!username) {
-            alert('Masukkan username terlebih dahulu!');
-            return;
+        // Fungsi untuk menyimpan aturan rank ke Firebase (jalankan sekali via console)
+        function saveRankRulesToDatabase() {
+            database.ref('ranks').set(rankData)
+                .then(() => console.log("Rank rules berhasil disimpan ke Firebase"))
+                .catch(err => console.error("Error menyimpan rank rules:", err));
         }
+
+        // Fungsi untuk memuat data rank dari Firebase
+        function loadRankDataFromFirebase() {
+            return database.ref('ranks').once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    rankDataFromFirebase = snapshot.val();
+                    console.log("Rank data loaded from Firebase");
+                } else {
+                    // Jika belum ada data di Firebase, gunakan data lokal
+                    rankDataFromFirebase = rankData;
+                    console.log("Using local rank data");
+                }
+                return rankDataFromFirebase;
+            }).catch(error => {
+                console.error("Error loading rank data:", error);
+                rankDataFromFirebase = rankData;
+                return rankDataFromFirebase;
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('login-btn').addEventListener('click', login);
+        document.getElementById('logout-btn').addEventListener('click', logout);
         
-        // Cek user di database
-        database.ref('users/' + username).once('value').then(snapshot => {
-            if (snapshot.exists()) {
-                // User sudah ada, ambil data
-                userData = snapshot.val();
+        // Menu navigasi
+        document.querySelectorAll('.menu-item').forEach(item => {
+            item.addEventListener('click', function() {
+                // Hapus kelas active dari semua menu
+                document.querySelectorAll('.menu-item').forEach(i => {
+                    i.classList.remove('active');
+                });
+                
+                // Tambah kelas active ke menu yang dipilih
+                this.classList.add('active');
+                
+                // Sembunyikan semua section
+                document.querySelectorAll('.section').forEach(section => {
+                    section.classList.remove('active');
+                });
+                
+                // Tampilkan section yang dipilih
+                const sectionId = this.getAttribute('data-section') + '-section';
+                document.getElementById(sectionId).classList.add('active');
+                
+                // Jika leaderboard, muat data
+                if (this.getAttribute('data-section') === 'leaderboard') {
+                    loadLeaderboard();
+                }
+            });
+        });
+
+        // Tombol beli hero
+        document.querySelectorAll('.buy-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const heroId = this.getAttribute('data-hero');
+                buyHero(heroId);
+            });
+        });
+
+        // Tombol main
+        document.getElementById('play-war3d').addEventListener('click', function() {
+            startWar3dGame();
+        });
+        
+        document.getElementById('play-rank').addEventListener('click', function() {
+            showHeroSelection('rank');
+        });
+        
+        document.getElementById('play-rank-match').addEventListener('click', function() {
+            showHeroSelection('rank');
+        });
+
+        // Tombol modal pemilihan hero
+        document.getElementById('hero-selection-confirm').addEventListener('click', startRankGame);
+        document.getElementById('hero-selection-cancel').addEventListener('click', closeHeroSelection);
+
+        // Fungsi login
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            
+            if (!username) {
+                alert('Masukkan username terlebih dahulu!');
+                return;
+            }
+            
+            // Cek user di database
+            database.ref('users/' + username).once('value').then(snapshot => {
+                if (snapshot.exists()) {
+                    // User sudah ada, ambil data
+                    userData = snapshot.val();
+                } else {
+                    // User baru, buat data default
+                    userData = createNewUserData(username);
+                    database.ref('users/' + username).set(userData);
+                }
+                
+                // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
+                if (username.toLowerCase() === 'taher') {
+                    userData.money = 999999;
+                    userData.diamond = 999999;
+                    userData.heroes = {
+                        saskeh: true,
+                        narto: true,
+                        lord_tachi: true
+                    };
+                }
+                
+                currentUser = username;
+                localStorage.setItem('currentUser', currentUser);
+                
+                // Update UI
+                updateUI();
+                
+                // Tampilkan scene utama
+                document.getElementById('login-scene').style.display = 'none';
+                document.getElementById('main-scene').style.display = 'block';
+            });
+        }
+
+        // Fungsi logout
+        function logout() {
+            currentUser = null;
+            userData = null;
+            localStorage.removeItem('currentUser');
+            
+            // Reset form login
+            document.getElementById('username').value = '';
+            
+            // Tampilkan scene login
+            document.getElementById('login-scene').style.display = 'flex';
+            document.getElementById('main-scene').style.display = 'none';
+        }
+
+        // Fungsi untuk membuat data user baru
+        function createNewUserData(username) {
+            return {
+                username: username,
+                money: 1000,
+                diamond: 50,
+                heroes: {
+                    saskeh: false,
+                    narto: false,
+                    lord_tachi: false
+                },
+                rank: "🥉 Beginner",
+                rankPoints: 0,
+                wins: 0,
+                losses: 0
+            };
+        }
+
+        // Fungsi untuk update UI berdasarkan data user
+        function updateUI() {
+            if (!userData) return;
+            
+            // Update info user di header
+            document.getElementById('user-name').textContent = userData.username;
+            document.getElementById('user-avatar').textContent = userData.username.charAt(0).toUpperCase();
+            document.getElementById('user-money').textContent = userData.money;
+            document.getElementById('user-diamond').textContent = userData.diamond;
+            
+            // Update info rank
+            const spaceIndex = userData.rank.indexOf(' ');
+            let rankIcon = userData.rank;
+            let rankName = userData.rank;
+            if (spaceIndex !== -1) {
+                rankIcon = userData.rank.substring(0, spaceIndex);
+                rankName = userData.rank.substring(spaceIndex + 1);
+            }
+            
+            document.getElementById('current-rank-icon').textContent = rankIcon;
+            document.getElementById('current-rank-name').textContent = rankName;
+            document.getElementById('rank-points').textContent = userData.rankPoints;
+            
+            // Update progress bar rank
+            const currentRankData = rankDataFromFirebase || rankData;
+            const currentRankInfo = currentRankData[userData.rank];
+            if (currentRankInfo) {
+                const progress = ((userData.rankPoints - currentRankInfo.min) / (currentRankInfo.max - currentRankInfo.min)) * 100;
+                document.getElementById('rank-progress-bar').style.width = Math.min(Math.max(progress, 0), 100) + '%';
+            }
+            
+            // Update statistik
+            const totalMatches = userData.wins + userData.losses;
+            const winRate = totalMatches > 0 ? Math.round((userData.wins / totalMatches) * 100) : 0;
+            
+            document.getElementById('total-wins').textContent = userData.wins;
+            document.getElementById('total-losses').textContent = userData.losses;
+            document.getElementById('win-rate').textContent = winRate + '%';
+            document.getElementById('matches-played').textContent = totalMatches;
+            
+            // Update profil
+            document.getElementById('profile-name').textContent = userData.username;
+            document.getElementById('profile-avatar').textContent = userData.username.charAt(0).toUpperCase();
+            document.getElementById('profile-wins').textContent = userData.wins;
+            document.getElementById('profile-losses').textContent = userData.losses;
+            document.getElementById('profile-winrate').textContent = winRate + '%';
+            
+            // Update tombol beli hero
+            document.querySelectorAll('.buy-btn').forEach(btn => {
+                const heroId = btn.getAttribute('data-hero');
+                if (userData.heroes && userData.heroes[heroId]) {
+                    btn.textContent = 'DIMILIKI';
+                    btn.style.background = '#666';
+                    btn.style.cursor = 'default';
+                } else {
+                    btn.textContent = 'BELI';
+                    btn.style.background = 'linear-gradient(to right, #00b09b, #96c93d)';
+                    btn.style.cursor = 'pointer';
+                }
+            });
+        }
+
+        // Fungsi untuk membeli hero
+        function buyHero(heroId) {
+            if (!userData || !userData.heroes) return;
+            
+            // Cek apakah hero sudah dimiliki
+            if (userData.heroes[heroId]) {
+                alert('Anda sudah memiliki hero ini!');
+                return;
+            }
+            
+            const hero = heroData[heroId];
+            if (!hero) return;
+            
+            // Cek apakah user memiliki cukup uang/diamond
+            if (hero.currency === 'money' && userData.money < hero.price) {
+                alert('Uang tidak cukup untuk membeli hero ini!');
+                return;
+            }
+            
+            if (hero.currency === 'diamond' && userData.diamond < hero.price) {
+                alert('Diamond tidak cukup!');
+                return;
+            }
+            
+            // Kurangi uang/diamond
+            if (hero.currency === 'money') {
+                userData.money -= hero.price;
             } else {
-                // User baru, buat data default
-                userData = createNewUserData(username);
-                database.ref('users/' + username).set(userData);
+                userData.diamond -= hero.price;
             }
             
-            // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
-            if (username.toLowerCase() === 'taher') {
-                userData.money = 999999;
-                userData.diamond = 999999;
-                userData.heroes = {
-                    saskeh: true,
-                    narto: true,
-                    lord_tachi: true
-                };
-            }
+            // Tambahkan hero
+            userData.heroes[heroId] = true;
             
-            currentUser = username;
-            localStorage.setItem('currentUser', currentUser);
-            
-            // PERBAIKAN: Reset notifikasi kenaikan rank saat login
-            hasShownRankUpNotification = false;
+            // Update ke database
+            database.ref('users/' + currentUser).set(userData);
             
             // Update UI
             updateUI();
             
-            // Tampilkan scene utama
-            document.getElementById('login-scene').style.display = 'none';
-            document.getElementById('main-scene').style.display = 'block';
-        });
-    }
-
-    // Fungsi logout
-    function logout() {
-        currentUser = null;
-        userData = null;
-        localStorage.removeItem('currentUser');
-        
-        // Reset form login
-        document.getElementById('username').value = '';
-        
-        // Tampilkan scene login
-        document.getElementById('login-scene').style.display = 'flex';
-        document.getElementById('main-scene').style.display = 'none';
-    }
-
-    // Fungsi untuk membuat data user baru
-    function createNewUserData(username) {
-        return {
-            username: username,
-            money: 1000,
-            diamond: 50,
-            heroes: {
-                saskeh: false,
-                narto: false,
-                lord_tachi: false
-            },
-            rank: "🥉 Beginner",
-            rankPoints: 0,
-            wins: 0,
-            losses: 0
-        };
-    }
-
-    // Fungsi untuk update UI berdasarkan data user
-    function updateUI() {
-        if (!userData) return;
-        
-        // Update info user di header
-        document.getElementById('user-name').textContent = userData.username;
-        document.getElementById('user-avatar').textContent = userData.username.charAt(0).toUpperCase();
-        document.getElementById('user-money').textContent = userData.money;
-        document.getElementById('user-diamond').textContent = userData.diamond;
-        
-        // Update info rank
-        const spaceIndex = userData.rank.indexOf(' ');
-        let rankIcon = userData.rank;
-        let rankName = userData.rank;
-        if (spaceIndex !== -1) {
-            rankIcon = userData.rank.substring(0, spaceIndex);
-            rankName = userData.rank.substring(spaceIndex + 1);
+            alert(`Selamat! Anda berhasil membeli ${hero.name}!`);
         }
-        
-        document.getElementById('current-rank-icon').textContent = rankIcon;
-        document.getElementById('current-rank-name').textContent = rankName;
-        document.getElementById('rank-points').textContent = userData.rankPoints;
-        
-        // Update progress bar rank
-        const currentRank = rankData[userData.rank];
-        if (currentRank) {
-            const progress = ((userData.rankPoints - currentRank.min) / (currentRank.max - currentRank.min)) * 100;
-            document.getElementById('rank-progress-bar').style.width = Math.min(progress, 100) + '%';
-        }
-        
-        // Update statistik
-        const totalMatches = userData.wins + userData.losses;
-        const winRate = totalMatches > 0 ? Math.round((userData.wins / totalMatches) * 100) : 0;
-        
-        document.getElementById('total-wins').textContent = userData.wins;
-        document.getElementById('total-losses').textContent = userData.losses;
-        document.getElementById('win-rate').textContent = winRate + '%';
-        document.getElementById('matches-played').textContent = totalMatches;
-        
-        // Update profil
-        document.getElementById('profile-name').textContent = userData.username;
-        document.getElementById('profile-avatar').textContent = userData.username.charAt(0).toUpperCase();
-        document.getElementById('profile-wins').textContent = userData.wins;
-        document.getElementById('profile-losses').textContent = userData.losses;
-        document.getElementById('profile-winrate').textContent = winRate + '%';
-        
-        // Update tombol beli hero
-        document.querySelectorAll('.buy-btn').forEach(btn => {
-            const heroId = btn.getAttribute('data-hero');
-            if (userData.heroes && userData.heroes[heroId]) {
-                btn.textContent = 'DIMILIKI';
-                btn.style.background = '#666';
-                btn.style.cursor = 'default';
-            } else {
-                btn.textContent = 'BELI';
-                btn.style.background = 'linear-gradient(to right, #00b09b, #96c93d)';
-                btn.style.cursor = 'pointer';
+
+        // Fungsi untuk menampilkan modal pemilihan hero (untuk mode rank)
+        function showHeroSelection(gameMode) {
+            if (!userData || !userData.heroes) {
+                alert('Anda belum memiliki hero! Beli hero di shop terlebih dahulu.');
+                return;
             }
-        });
-    }
 
-    // Fungsi untuk membeli hero
-    function buyHero(heroId) {
-        if (!userData || !userData.heroes) return;
-        
-        // Cek apakah hero sudah dimiliki
-        if (userData.heroes[heroId]) {
-            alert('Anda sudah memiliki hero ini!');
-            return;
-        }
-        
-        const hero = heroData[heroId];
-        if (!hero) return;
-        
-        // Cek apakah user memiliki cukup uang/diamond
-        if (hero.currency === 'money' && userData.money < hero.price) {
-            alert('Uang tidak cukup untuk membeli hero ini!');
-            return;
-        }
-        
-        if (hero.currency === 'diamond' && userData.diamond < hero.price) {
-            alert('Diamond tidak cukup!');
-            return;
-        }
-        
-        // Kurangi uang/diamond
-        if (hero.currency === 'money') {
-            userData.money -= hero.price;
-        } else {
-            userData.diamond -= hero.price;
-        }
-        
-        // Tambahkan hero
-        userData.heroes[heroId] = true;
-        
-        // Update ke database
-        database.ref('users/' + currentUser).set(userData);
-        
-        // Update UI
-        updateUI();
-        
-        alert(`Selamat! Anda berhasil membeli ${hero.name}!`);
-    }
-
-    // Fungsi untuk menampilkan modal pemilihan hero (untuk mode rank)
-    function showHeroSelection(gameMode) {
-        if (!userData || !userData.heroes) {
-            alert('Anda belum memiliki hero! Beli hero di shop terlebih dahulu.');
-            return;
-        }
-
-        // Cek apakah user memiliki hero
-        const ownedHeroes = Object.keys(userData.heroes).filter(heroId => userData.heroes[heroId]);
-        
-        if (ownedHeroes.length === 0) {
-            alert('Anda belum memiliki hero! Beli hero di shop terlebih dahulu.');
-            return;
-        }
-
-        currentGameMode = gameMode;
-        selectedHero = null;
-        
-        // Update daftar hero yang dimiliki
-        const heroList = document.getElementById('hero-selection-list');
-        heroList.innerHTML = '';
-        
-        ownedHeroes.forEach(heroId => {
-            const hero = heroData[heroId];
-            if (!hero) return;
+            // Cek apakah user memiliki hero
+            const ownedHeroes = Object.keys(userData.heroes).filter(heroId => userData.heroes[heroId]);
             
-            const heroCard = document.createElement('div');
-            heroCard.className = 'hero-selection-card';
-            heroCard.setAttribute('data-hero', heroId);
+            if (ownedHeroes.length === 0) {
+                alert('Anda belum memiliki hero! Beli hero di shop terlebih dahuli.');
+                return;
+            }
+
+            currentGameMode = gameMode;
+            selectedHero = null;
             
-            heroCard.innerHTML = `
-                <img src="${getHeroImage(heroId)}" alt="${hero.name}" class="hero-selection-image">
-                <div class="hero-selection-name">${hero.name}</div>
-            `;
+            // Update daftar hero yang dimiliki
+            const heroList = document.getElementById('hero-selection-list');
+            heroList.innerHTML = '';
             
-            heroCard.addEventListener('click', function() {
-                selectHero(heroId);
-            });
-            
-            heroList.appendChild(heroCard);
-        });
-        
-        // Reset tombol konfirmasi
-        document.getElementById('hero-selection-confirm').disabled = true;
-        
-        // Tampilkan modal
-        document.getElementById('hero-selection-modal').style.display = 'flex';
-    }
-
-    // Fungsi untuk menutup modal pemilihan hero
-    function closeHeroSelection() {
-        document.getElementById('hero-selection-modal').style.display = 'none';
-        selectedHero = null;
-        currentGameMode = null;
-    }
-
-    // Fungsi untuk memilih hero
-    function selectHero(heroId) {
-        // Hapus seleksi sebelumnya
-        document.querySelectorAll('.hero-selection-card').forEach(card => {
-            card.classList.remove('selected');
-        });
-        
-        // Tandai hero yang dipilih
-        const selectedCard = document.querySelector(`.hero-selection-card[data-hero="${heroId}"]`);
-        if (selectedCard) {
-            selectedCard.classList.add('selected');
-        }
-        
-        selectedHero = heroId;
-        
-        // Aktifkan tombol konfirmasi
-        document.getElementById('hero-selection-confirm').disabled = false;
-    }
-
-    // Fungsi untuk memulai game War3D (tanpa pilih hero)
-    function startWar3dGame() {
-        if (!currentUser) {
-            alert('Anda belum login!');
-            return;
-        }
-        
-        // Simpan mode game ke Firebase
-        database.ref('users/' + currentUser + '/gameMode').set('war3d')
-            .then(() => {
-                // Simpan timestamp mulai game
-                return database.ref('users/' + currentUser + '/gameStartTime').set(firebase.database.ServerValue.TIMESTAMP);
-            })
-            .then(() => {
-                // Redirect ke halaman game War3D
-                window.location.href = 'Exe War.html';
-            })
-            .catch(error => {
-                console.error('Error memulai game War3D:', error);
-                alert('Terjadi kesalahan saat memulai game. Silakan coba lagi.');
-            });
-    }
-
-    // Fungsi untuk memulai game rank (dengan hero)
-    function startRankGame() {
-        if (!selectedHero || !currentUser) {
-            alert('Pilih hero terlebih dahulu!');
-            return;
-        }
-        
-        // Simpan hero yang dipilih dan mode game ke Firebase
-        database.ref('users/' + currentUser + '/selectedHero').set(selectedHero)
-            .then(() => {
-                return database.ref('users/' + currentUser + '/gameMode').set('rank');
-            })
-            .then(() => {
-                // Simpan timestamp mulai game
-                return database.ref('users/' + currentUser + '/gameStartTime').set(firebase.database.ServerValue.TIMESTAMP);
-            })
-            .then(() => {
-                // Tutup modal
-                closeHeroSelection();
+            ownedHeroes.forEach(heroId => {
+                const hero = heroData[heroId];
+                if (!hero) return;
                 
-                // Redirect ke halaman game rank
-                window.location.href = 'main.html';
-            })
-            .catch(error => {
-                console.error('Error menyimpan data hero:', error);
-                alert('Terjadi kesalahan saat memulai game. Silakan coba lagi.');
+                const heroCard = document.createElement('div');
+                heroCard.className = 'hero-selection-card';
+                heroCard.setAttribute('data-hero', heroId);
+                
+                heroCard.innerHTML = `
+                    <img src="${getHeroImage(heroId)}" alt="${hero.name}" class="hero-selection-image">
+                    <div class="hero-selection-name">${hero.name}</div>
+                `;
+                
+                heroCard.addEventListener('click', function() {
+                    selectHero(heroId);
+                });
+                
+                heroList.appendChild(heroCard);
             });
-    }
-
-    // Fungsi untuk mendapatkan gambar hero berdasarkan ID
-    function getHeroImage(heroId) {
-        const images = {
-            'saskeh': 'https://b.top4top.io/p_3606vrk010.png',
-            'narto': 'https://c.top4top.io/p_36068qft31.png',
-            'lord_tachi': 'https://l.top4top.io/p_3606j9ku80.png'
-        };
-        
-        return images[heroId] || '';
-    }
-
-    // Fungsi untuk membuat data pemain random untuk leaderboard
-    function generateRandomPlayers(count) {
-        const names = [
-            "SaskehUchiha", "NartoUzumaki", "LordTachi", "SakuraHaruno", "Kakashi",
-            "Itachi", "Madara", "Obito", "Minato", "Hashirama", "Tsunade", "Jiraiya",
-            "Orochimaru", "Gaara", "RockLee", "Neji", "Shikamaru", "Choji", "Ino"
-        ];
-        
-        const players = [];
-        
-        for (let i = 0; i < count; i++) {
-            const name = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 100);
-            const rankPoints = Math.floor(Math.random() * 35000); // Diperbarui untuk range yang lebih tinggi
-            const wins = Math.floor(Math.random() * 500);
-            const losses = Math.floor(Math.random() * 200);
             
-            // PERBAIKAN: Tentukan rank berdasarkan points dengan sistem yang sama
-            let rank = "🥉 Beginner";
-            for (const [rankName, data] of Object.entries(rankData)) {
-                if (rankPoints >= data.min && rankPoints < data.max) {
-                    rank = rankName;
-                    break;
-                }
+            // Reset tombol konfirmasi
+            document.getElementById('hero-selection-confirm').disabled = true;
+            
+            // Tampilkan modal
+            document.getElementById('hero-selection-modal').style.display = 'flex';
+        }
+
+        // Fungsi untuk menutup modal pemilihan hero
+        function closeHeroSelection() {
+            document.getElementById('hero-selection-modal').style.display = 'none';
+            selectedHero = null;
+            currentGameMode = null;
+        }
+
+        // Fungsi untuk memilih hero
+        function selectHero(heroId) {
+            // Hapus seleksi sebelumnya
+            document.querySelectorAll('.hero-selection-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Tandai hero yang dipilih
+            const selectedCard = document.querySelector(`.hero-selection-card[data-hero="${heroId}"]`);
+            if (selectedCard) {
+                selectedCard.classList.add('selected');
             }
             
-            players.push({
-                username: name,
-                rankPoints: rankPoints,
-                rank: rank,
-                wins: wins,
-                losses: losses
-            });
+            selectedHero = heroId;
+            
+            // Aktifkan tombol konfirmasi
+            document.getElementById('hero-selection-confirm').disabled = false;
         }
-        
-        return players;
-    }
 
-    // Fungsi untuk memuat leaderboard
-    function loadLeaderboard() {
-        database.ref('users').once('value').then(snapshot => {
-            const users = snapshot.val();
-            const leaderboardList = document.querySelector('.leaderboard-list');
-            leaderboardList.innerHTML = '';
+        // Fungsi untuk memulai game War3D (tanpa pilih hero)
+        function startWar3dGame() {
+            if (!currentUser) {
+                alert('Anda belum login!');
+                return;
+            }
             
-            let allPlayers = [];
+            // Simpan mode game ke Firebase
+            database.ref('users/' + currentUser + '/gameMode').set('war3d')
+                .then(() => {
+                    // Simpan timestamp mulai game
+                    return database.ref('users/' + currentUser + '/gameStartTime').set(firebase.database.ServerValue.TIMESTAMP);
+                })
+                .then(() => {
+                    // Redirect ke halaman game War3D
+                    window.location.href = 'Exe War.html';
+                })
+                .catch(error => {
+                    console.error('Error memulai game War3D:', error);
+                    alert('Terjadi kesalahan saat memulai game. Silakan coba lagi.');
+                });
+        }
+
+        // Fungsi untuk memulai game rank (dengan hero)
+        function startRankGame() {
+            if (!selectedHero || !currentUser) {
+                alert('Pilih hero terlebih dahulu!');
+                return;
+            }
             
-            // Tambahkan semua pemain dari database
-            if (users) {
-                Object.values(users).forEach(user => {
-                    if (user.username && user.rankPoints !== undefined) {
-                        // PERBAIKAN: Gunakan rank yang sudah tersimpan di database
-                        allPlayers.push({
-                            username: user.username,
-                            rankPoints: user.rankPoints || 0,
-                            rank: user.rank || "🥉 Beginner",
-                            wins: user.wins || 0,
-                            losses: user.losses || 0,
-                            isCurrentUser: currentUser && user.username.toLowerCase() === currentUser.toLowerCase()
-                        });
+            // Simpan hero yang dipilih dan mode game ke Firebase
+            database.ref('users/' + currentUser + '/selectedHero').set(selectedHero)
+                .then(() => {
+                    return database.ref('users/' + currentUser + '/gameMode').set('rank');
+                })
+                .then(() => {
+                    // Simpan timestamp mulai game
+                    return database.ref('users/' + currentUser + '/gameStartTime').set(firebase.database.ServerValue.TIMESTAMP);
+                })
+                .then(() => {
+                    // Tutup modal
+                    closeHeroSelection();
+                    
+                    // Redirect ke halaman game rank
+                    window.location.href = 'main.html';
+                })
+                .catch(error => {
+                    console.error('Error menyimpan data hero:', error);
+                    alert('Terjadi kesalahan saat memulai game. Silakan coba lagi.');
+                });
+        }
+
+        // Fungsi untuk mendapatkan gambar hero berdasarkan ID
+        function getHeroImage(heroId) {
+            const images = {
+                'saskeh': 'https://b.top4top.io/p_3606vrk010.png',
+                'narto': 'https://c.top4top.io/p_36068qft31.png',
+                'lord_tachi': 'https://l.top4top.io/p_3606j9ku80.png'
+            };
+            
+            return images[heroId] || '';
+        }
+
+        // Fungsi untuk membuat data pemain random untuk leaderboard
+        function generateRandomPlayers(count) {
+            const names = [
+                "SaskehUchiha", "NartoUzumaki", "LordTachi", "SakuraHaruno", "Kakashi",
+                "Itachi", "Madara", "Obito", "Minato", "Hashirama", "Tsunade", "Jiraiya",
+                "Orochimaru", "Gaara", "RockLee", "Neji", "Shikamaru", "Choji", "Ino"
+            ];
+            
+            const players = [];
+            const currentRankData = rankDataFromFirebase || rankData;
+            
+            for (let i = 0; i < count; i++) {
+                const name = names[Math.floor(Math.random() * names.length)] + Math.floor(Math.random() * 100);
+                const rankPoints = Math.floor(Math.random() * 35000);
+                const wins = Math.floor(Math.random() * 500);
+                const losses = Math.floor(Math.random() * 200);
+                
+                // Tentukan rank berdasarkan points dengan data dari Firebase
+                let rank = "🥉 Beginner";
+                for (const [rankName, data] of Object.entries(currentRankData)) {
+                    if (rankPoints >= data.min && rankPoints < data.max) {
+                        rank = rankName;
+                        break;
                     }
+                }
+                
+                players.push({
+                    username: name,
+                    rankPoints: rankPoints,
+                    rank: rank,
+                    wins: wins,
+                    losses: losses
                 });
             }
             
-            // Jika kurang dari 10 pemain, tambahkan pemain random
-            if (allPlayers.length < 10) {
-                const randomPlayers = generateRandomPlayers(10 - allPlayers.length);
-                allPlayers = allPlayers.concat(randomPlayers);
-            }
-            
-            // Urutkan berdasarkan rank points (descending)
-            allPlayers.sort((a, b) => b.rankPoints - a.rankPoints);
-            
-            // Ambil top 10
-            const top10 = allPlayers.slice(0, 10);
-            
-            // Tampilkan leaderboard
-            top10.forEach((player, index) => {
-                const rank = index + 1;
-                const spaceIndex2 = player.rank.indexOf(' ');
-                let rankIcon = player.rank;
-                let rankName = player.rank;
-                if (spaceIndex2 !== -1) {
-                    rankIcon = player.rank.substring(0, spaceIndex2);
-                    rankName = player.rank.substring(spaceIndex2 + 1);
+            return players;
+        }
+
+        // Fungsi untuk memuat leaderboard
+        function loadLeaderboard() {
+            database.ref('users').once('value').then(snapshot => {
+                const users = snapshot.val();
+                const leaderboardList = document.querySelector('.leaderboard-list');
+                leaderboardList.innerHTML = '';
+                
+                let allPlayers = [];
+                
+                // Tambahkan semua pemain dari database
+                if (users) {
+                    Object.values(users).forEach(user => {
+                        if (user.username && user.rankPoints !== undefined) {
+                            // PERBAIKAN: Gunakan rank yang sudah tersimpan di database
+                            allPlayers.push({
+                                username: user.username,
+                                rankPoints: user.rankPoints || 0,
+                                rank: user.rank || "🥉 Beginner",
+                                wins: user.wins || 0,
+                                losses: user.losses || 0,
+                                isCurrentUser: currentUser && user.username.toLowerCase() === currentUser.toLowerCase()
+                            });
+                        }
+                    });
                 }
                 
-                const leaderboardItem = document.createElement('div');
-                leaderboardItem.className = `leaderboard-item ${rank <= 3 ? 'top-3' : ''} ${player.isCurrentUser ? 'leaderboard-player-highlight' : ''}`;
+                // Jika kurang dari 10 pemain, tambahkan pemain random
+                if (allPlayers.length < 10) {
+                    const randomPlayers = generateRandomPlayers(10 - allPlayers.length);
+                    allPlayers = allPlayers.concat(randomPlayers);
+                }
                 
-                leaderboardItem.innerHTML = `
-                    <div class="leaderboard-rank">${rank}</div>
-                    <div class="leaderboard-avatar">${player.username.charAt(0).toUpperCase()}</div>
-                    <div class="leaderboard-info">
-                        <div class="leaderboard-name">${player.username} ${player.isCurrentUser ? '(Anda)' : ''}</div>
-                        <div class="leaderboard-stats">
-                            <div class="leaderboard-points">Poin: ${player.rankPoints}</div>
-                            <div class="leaderboard-rank-name">${rankIcon} ${rankName}</div>
+                // Urutkan berdasarkan rank points (descending)
+                allPlayers.sort((a, b) => b.rankPoints - a.rankPoints);
+                
+                // Ambil top 10
+                const top10 = allPlayers.slice(0, 10);
+                
+                // Tampilkan leaderboard
+                top10.forEach((player, index) => {
+                    const rank = index + 1;
+                    const spaceIndex2 = player.rank.indexOf(' ');
+                    let rankIcon = player.rank;
+                    let rankName = player.rank;
+                    if (spaceIndex2 !== -1) {
+                        rankIcon = player.rank.substring(0, spaceIndex2);
+                        rankName = player.rank.substring(spaceIndex2 + 1);
+                    }
+                    
+                    const leaderboardItem = document.createElement('div');
+                    leaderboardItem.className = `leaderboard-item ${rank <= 3 ? 'top-3' : ''} ${player.isCurrentUser ? 'leaderboard-player-highlight' : ''}`;
+                    
+                    leaderboardItem.innerHTML = `
+                        <div class="leaderboard-rank">${rank}</div>
+                        <div class="leaderboard-avatar">${player.username.charAt(0).toUpperCase()}</div>
+                        <div class="leaderboard-info">
+                            <div class="leaderboard-name">${player.username} ${player.isCurrentUser ? '(Anda)' : ''}</div>
+                            <div class="leaderboard-stats">
+                                <div class="leaderboard-points">Poin: ${player.rankPoints}</div>
+                                <div class="leaderboard-rank-name">${rankIcon} ${rankName}</div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                    
+                    leaderboardList.appendChild(leaderboardItem);
+                });
                 
-                leaderboardList.appendChild(leaderboardItem);
-            });
-            
-            // Jika tidak ada data
-            if (top10.length === 0) {
-                leaderboardList.innerHTML = '<div class="no-hero-message">Belum ada data leaderboard</div>';
-            }
-        });
-    }
-
-    // Fungsi bantu: simpan data user ke Firebase
-    function saveUserData() {
-        if (!currentUser || !userData) return Promise.resolve();
-        return database.ref('users/' + currentUser).set(userData);
-    }
-
-    // Fungsi bantu: ubah poin rank, update rank, simpan, dan update UI
-    function changePointsAndSave(pointsDelta, extra = {}) {
-        if (!currentUser || !userData) return;
-        // update points
-        userData.rankPoints = Math.max(0, (userData.rankPoints || 0) + pointsDelta);
-
-        // apply extras (wins/losses)
-        if (extra.win) userData.wins = (userData.wins || 0) + 1;
-        if (extra.loss) userData.losses = (userData.losses || 0) + 1;
-
-        // cek dan update rank
-        const oldRank = userData.rank;
-        updatePlayerRank(); // will set userData.rank and alert if changed
-
-        // simpan ke database lalu update UI
-        saveUserData().then(() => {
-            updateUI();
-        }).catch(err => {
-            console.error('Error saving user data:', err);
-        });
-    }
-
-    // Fungsi untuk update rank setelah menang di game War3D
-    function updateRankAfterWar3dWin() {
-        if (!currentUser || !userData) return;
-
-        const winPoints = 100; // Points untuk menang
-        // gunakan helper untuk memastikan rank selalu diperbarui dan disimpan
-        changePointsAndSave(winPoints, { win: true });
-
-        alert('Selamat! Anda memenangkan game War3D! +' + winPoints + ' Points Rank!');
-    }
-
-    // Fungsi untuk update rank setelah game rank
-    function updateRankAfterRankGame(isWin) {
-        if (!currentUser || !userData) return;
-
-        let pointsChange = 0;
-
-        if (isWin) {
-            pointsChange = 50;
-            changePointsAndSave(pointsChange, { win: true });
-        } else {
-            pointsChange = -20;
-            changePointsAndSave(pointsChange, { loss: true });
-        }
-
-        if (isWin) {
-            alert('Selamat! Anda memenangkan Rank Match! +' + pointsChange + ' Points Rank!');
-        } else {
-            alert('Anda kalah dalam Rank Match. ' + pointsChange + ' Points Rank.');
-        }
-    }
-
-    // Fungsi untuk update rank player - DIPERBAIKI
-    function updatePlayerRank() {
-        if (!userData) return;
-
-        const currentPoints = userData.rankPoints || 0;
-        let newRank = "🥉 Beginner";
-
-        // Cari rank yang sesuai berdasarkan points
-        for (const [rankName, data] of Object.entries(rankData)) {
-            if (currentPoints >= data.min && currentPoints < data.max) {
-                newRank = rankName;
-                break;
-            }
-        }
-
-        // Jika rank berubah, perbarui dan tampilkan notifikasi
-        const oldRank = userData.rank || null;
-        if (oldRank !== newRank) {
-            userData.rank = newRank;
-            try {
-                alert('Selamat! Rank Anda naik menjadi: ' + newRank);
-            } catch (e) {
-                console.log('Rank change to', newRank);
-            }
-        }
-    }
-
-    // Cek apakah user sudah login saat memuat halaman
-    window.addEventListener('DOMContentLoaded', function() {
-        const savedUser = localStorage.getItem('currentUser');
-
-        if (savedUser) {
-            // Ambil data user dari database
-            database.ref('users/' + savedUser).once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    userData = snapshot.val();
-                    currentUser = savedUser;
-
-                    // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
-                    if (currentUser.toLowerCase() === 'taher') {
-                        userData.money = 999999;
-                        userData.diamond = 999999;
-                        userData.heroes = {
-                            saskeh: true,
-                            narto: true,
-                            lord_tachi: true
-                        };
-                    }
-
-                    // Perbarui rank berdasarkan poin (jika diperlukan) dan simpan
-                    updatePlayerRank();
-                    saveUserData().catch(err => console.error('Error saving after rank sync:', err));
-
-                    updateUI();
-
-                    // Tampilkan scene utama
-                    document.getElementById('login-scene').style.display = 'none';
-                    document.getElementById('main-scene').style.display = 'block';
-                } else {
-                    localStorage.removeItem('currentUser');
+                // Jika tidak ada data
+                if (top10.length === 0) {
+                    leaderboardList.innerHTML = '<div class="no-hero-message">Belum ada data leaderboard</div>';
                 }
             });
         }
 
-        // Cek apakah ada parameter menang dari game War3D
-        const urlParams = new URLSearchParams(window.location.search);
-        const war3dWin = urlParams.get('war3d_win');
-        const rankWin = urlParams.get('rank_win');
-        const rankLose = urlParams.get('rank_lose');
-
-        if (war3dWin === 'true' && currentUser) {
-            updateRankAfterWar3dWin();
-
-            // Hapus parameter dari URL
-            const url = new URL(window.location);
-            url.searchParams.delete('war3d_win');
-            window.history.replaceState({}, '', url);
+        // Fungsi bantu: simpan data user ke Firebase
+        function saveUserData() {
+            if (!currentUser || !userData) return Promise.resolve();
+            return database.ref('users/' + currentUser).set(userData);
         }
 
-        if ((rankWin === 'true' || rankLose === 'true') && currentUser) {
-            updateRankAfterRankGame(rankWin === 'true');
+        // Fungsi bantu: ubah poin rank, update rank, simpan, dan update UI
+        function changePointsAndSave(pointsDelta, extra = {}) {
+            if (!currentUser || !userData) return;
+            // update points
+            userData.rankPoints = Math.max(0, (userData.rankPoints || 0) + pointsDelta);
 
-            // Hapus parameter dari URL
-            const url = new URL(window.location);
-            url.searchParams.delete('rank_win');
-            url.searchParams.delete('rank_lose');
-            window.history.replaceState({}, '', url);
-        }
-    });
-    // Cek apakah user sudah login saat memuat halaman END
-// Cek apakah user sudah login saat memuat halaman
+            // apply extras (wins/losses)
+            if (extra.win) userData.wins = (userData.wins || 0) + 1;
+            if (extra.loss) userData.losses = (userData.losses || 0) + 1;
 
-    window.addEventListener('DOMContentLoaded', function() {
-        const savedUser = localStorage.getItem('currentUser');
-        
-        if (savedUser) {
-            // Ambil data user dari database
-            database.ref('users/' + savedUser).once('value').then(snapshot => {
-                if (snapshot.exists()) {
-                    userData = snapshot.val();
-                    currentUser = savedUser;
-                    
-                    // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
-                    if (currentUser.toLowerCase() === 'taher') {
-                        userData.money = 999999;
-                        userData.diamond = 999999;
-                        userData.heroes = {
-                            saskeh: true,
-                            narto: true,
-                            lord_tachi: true
-                        };
-                    }
-                    
-                    // PERBAIKAN: Jangan panggil updatePlayerRank() saat login
-                    // untuk menghindari notifikasi berulang
-                    // updatePlayerRank();
-                    
-                    updateUI();
-                    
-                    // Tampilkan scene utama
-                    document.getElementById('login-scene').style.display = 'none';
-                    document.getElementById('main-scene').style.display = 'block';
-                } else {
-                    localStorage.removeItem('currentUser');
-                }
+            // cek dan update rank
+            const oldRank = userData.rank;
+            updatePlayerRank(); // will set userData.rank and alert if changed
+
+            // simpan ke database lalu update UI
+            saveUserData().then(() => {
+                updateUI();
+            }).catch(err => {
+                console.error('Error saving user data:', err);
             });
         }
-        
-        // Cek apakah ada parameter menang dari game War3D
-        const urlParams = new URLSearchParams(window.location.search);
-        const war3dWin = urlParams.get('war3d_win');
-        const rankWin = urlParams.get('rank_win');
-        const rankLose = urlParams.get('rank_lose');
-        
-        if (war3dWin === 'true' && currentUser) {
-            updateRankAfterWar3dWin();
-            
-            // Hapus parameter dari URL
-            const url = new URL(window.location);
-            url.searchParams.delete('war3d_win');
-            window.history.replaceState({}, '', url);
+
+        // Fungsi untuk update rank setelah menang di game War3D
+        function updateRankAfterWar3dWin() {
+            if (!currentUser || !userData) return;
+
+            const winPoints = 100; // Points untuk menang
+            // gunakan helper untuk memastikan rank selalu diperbarui dan disimpan
+            changePointsAndSave(winPoints, { win: true });
+
+            alert('Selamat! Anda memenangkan game War3D! +' + winPoints + ' Points Rank!');
         }
-        
-        if ((rankWin === 'true' || rankLose === 'true') && currentUser) {
-            updateRankAfterRankGame(rankWin === 'true');
-            
-            // Hapus parameter dari URL
-            const url = new URL(window.location);
-            url.searchParams.delete('rank_win');
-            url.searchParams.delete('rank_lose');
-            window.history.replaceState({}, '', url);
+
+        // Fungsi untuk update rank setelah game rank
+        function updateRankAfterRankGame(isWin) {
+            if (!currentUser || !userData) return;
+
+            let pointsChange = 0;
+
+            if (isWin) {
+                pointsChange = 50;
+                changePointsAndSave(pointsChange, { win: true });
+            } else {
+                pointsChange = -20;
+                changePointsAndSave(pointsChange, { loss: true });
+            }
+
+            if (isWin) {
+                alert('Selamat! Anda memenangkan Rank Match! +' + pointsChange + ' Points Rank!');
+            } else {
+                alert('Anda kalah dalam Rank Match. ' + pointsChange + ' Points Rank.');
+            }
         }
-    });
-</script>
+
+        // Fungsi untuk update rank player - DIPERBAIKI
+        function updatePlayerRank() {
+            if (!userData) return;
+
+            const currentPoints = userData.rankPoints || 0;
+            let newRank = "🥉 Beginner";
+
+            // Cari rank yang sesuai berdasarkan points - DIPERBAIKI
+            const currentRankData = rankDataFromFirebase || rankData;
+            for (const [rankName, data] of Object.entries(currentRankData)) {
+                if (currentPoints >= data.min && currentPoints < data.max) {
+                    newRank = rankName;
+                    break;
+                }
+            }
+
+            // Jika rank berubah, perbarui dan tampilkan notifikasi
+            const oldRank = userData.rank || null;
+            if (oldRank !== newRank) {
+                userData.rank = newRank;
+                try {
+                    alert('Selamat! Rank Anda naik menjadi: ' + newRank);
+                } catch (e) {
+                    console.log('Rank change to', newRank);
+                }
+            }
+        }
+
+        // Cek apakah user sudah login saat memuat halaman
+        window.addEventListener('DOMContentLoaded', function() {
+            // Load rank data dari Firebase terlebih dahulu
+            loadRankDataFromFirebase().then(() => {
+                const savedUser = localStorage.getItem('currentUser');
+
+                if (savedUser) {
+                    // Ambil data user dari database
+                    database.ref('users/' + savedUser).once('value').then(snapshot => {
+                        if (snapshot.exists()) {
+                            userData = snapshot.val();
+                            currentUser = savedUser;
+
+                            // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
+                            if (currentUser.toLowerCase() === 'taher') {
+                                userData.money = 999999;
+                                userData.diamond = 999999;
+                                userData.heroes = {
+                                    saskeh: true,
+                                    narto: true,
+                                    lord_tachi: true
+                                };
+                            }
+
+                            // PERBAIKAN: Update rank saat login untuk memastikan konsistensi
+                            updatePlayerRank();
+                            saveUserData().catch(err => console.error('Error saving after rank sync:', err));
+
+                            updateUI();
+
+                            // Tampilkan scene utama
+                            document.getElementById('login-scene').style.display = 'none';
+                            document.getElementById('main-scene').style.display = 'block';
+                        } else {
+                            localStorage.removeItem('currentUser');
+                        }
+                    });
+                }
+            });
+
+            // Cek apakah ada parameter menang dari game War3D
+            const urlParams = new URLSearchParams(window.location.search);
+            const war3dWin = urlParams.get('war3d_win');
+            const rankWin = urlParams.get('rank_win');
+            const rankLose = urlParams.get('rank_lose');
+
+            if (war3dWin === 'true' && currentUser) {
+                updateRankAfterWar3dWin();
+
+                // Hapus parameter dari URL
+                const url = new URL(window.location);
+                url.searchParams.delete('war3d_win');
+                window.history.replaceState({}, '', url);
+            }
+
+            if ((rankWin === 'true' || rankLose === 'true') && currentUser) {
+                updateRankAfterRankGame(rankWin === 'true');
+
+                // Hapus parameter dari URL
+                const url = new URL(window.location);
+                url.searchParams.delete('rank_win');
+                url.searchParams.delete('rank_lose');
+                window.history.replaceState({}, '', url);
+            }
+        });
+
+    </script>
 </body>
 </html>
