@@ -705,8 +705,8 @@
     <!-- Scene Login -->
     <div id="login-scene" class="scene">
         <div class="login-form">
-            <h1>Moba Mini</h1>
-            <p>Masuk untuk memulai petualangan Moba Versi Lite</p>
+            <h1>🎮 Game One For All</h1>
+            <p>Masuk untuk memulai petualangan Game Versi Lite</p>
             <div class="input-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" placeholder="Masukkan username Anda">
@@ -945,9 +945,9 @@
                             <!-- Daftar rank akan ditampilkan di sini -->
                         </div>
                         <div class="event-buttons">
-                            <button class="event-btn" onclick="window.location.href='spin.html'">Spin</button>
-                            <button class="event-btn" onclick="window.location.href='event.html'">Event</button>
-                            <button class="event-btn" onclick="window.location.href='misi.html'">Misi</button>
+                            <button class="event-btn" onclick="window.location.href='spin.html'">🎰 Lucky Spin</button>
+                            <button class="event-btn" onclick="window.location.href='event.html'">📦 Event</button>
+                            <button class="event-btn" onclick="window.location.href='misi.html'">📋 Misi Harian</button>
                         </div>
                     </div>
 
@@ -1044,6 +1044,48 @@
         let selectedHero = null;
         let currentGameMode = null;
         let rankDataFromFirebase = null;
+
+        // FUNGSI BARU: Untuk mendapatkan tanggal hari ini dalam format YYYY-MM-DD
+        function getTodayDate() {
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // FUNGSI BARU: Untuk menyelesaikan misi login
+        function completeLoginMission() {
+            if (!currentUser) return;
+            
+            const today = getTodayDate();
+            database.ref('users/' + currentUser + '/dailyMissions/' + today + '/login').set({
+                completed: true,
+                claimed: false
+            });
+        }
+
+        // FUNGSI BARU: Untuk menyelesaikan misi main game
+        function completePlayMission() {
+            if (!currentUser) return;
+            
+            const today = getTodayDate();
+            database.ref('users/' + currentUser + '/dailyMissions/' + today + '/play').set({
+                completed: true,
+                claimed: false
+            });
+        }
+
+        // FUNGSI BARU: Untuk menyelesaikan misi beli hero
+        function completeBuyHeroMission() {
+            if (!currentUser) return;
+            
+            const today = getTodayDate();
+            database.ref('users/' + currentUser + '/dailyMissions/' + today + '/buy_hero').set({
+                completed: true,
+                claimed: false
+            });
+        }
 
         // Fungsi untuk menyimpan aturan rank ke Firebase (jalankan sekali via console)
         function saveRankRulesToDatabase() {
@@ -1176,6 +1218,9 @@
                 
                 currentUser = username;
                 localStorage.setItem('currentUser', currentUser);
+                
+                // PERBAIKAN: Panggil fungsi untuk menyelesaikan misi login
+                completeLoginMission();
                 
                 // Update UI
                 updateUI();
@@ -1343,6 +1388,9 @@
             // Tambahkan hero
             userData.heroes[heroId] = true;
             
+            // PERBAIKAN: Panggil fungsi untuk menyelesaikan misi beli hero
+            completeBuyHeroMission();
+            
             // Update ke database
             database.ref('users/' + currentUser).set(userData);
             
@@ -1477,6 +1525,9 @@
                 return;
             }
             
+            // PERBAIKAN: Panggil fungsi untuk menyelesaikan misi main game
+            completePlayMission();
+            
             // Simpan mode game ke Firebase
             database.ref('users/' + currentUser + '/gameMode').set('war3d')
                 .then(() => {
@@ -1499,6 +1550,9 @@
                 alert('Pilih hero terlebih dahulu!');
                 return;
             }
+            
+            // PERBAIKAN: Panggil fungsi untuk menyelesaikan misi main game
+            completePlayMission();
             
             // Simpan hero yang dipilih dan mode game ke Firebase
             database.ref('users/' + currentUser + '/selectedHero').set(selectedHero)
@@ -1713,7 +1767,7 @@
         function updateRankAfterWar3dWin() {
             if (!currentUser || !userData) return;
 
-            const winPoints = 9000000; // Points untuk menang
+            const winPoints = 200; // Points untuk menang
             // gunakan helper untuk memastikan rank selalu diperbarui dan disimpan
             changePointsAndSave(winPoints, { win: true });
 
@@ -1781,9 +1835,6 @@
                         if (snapshot.exists()) {
                             userData = snapshot.val();
                             currentUser = savedUser;
-
-                            // PERBAIKAN: Gunakan case insensitive untuk user "Taher"
-                            
 
                             // PERBAIKAN: Update rank saat login untuk memastikan konsistensi
                             updatePlayerRank();
